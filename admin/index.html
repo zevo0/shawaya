@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لوحة تحكم شواية</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/webp" href="../assets/images/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+
+<!-- ================= LOGIN ================= -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <img src="../assets/images/logo.webp" alt="شعار شواية">
+    <h1>لوحة تحكم شواية</h1>
+    <p class="sub">سجّل الدخول لإدارة المنيو والطلبات والإعدادات</p>
+    <form class="login-form" id="login-form">
+      <div class="field">
+        <label for="login-email">البريد الإلكتروني</label>
+        <input type="email" id="login-email" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="login-password">كلمة المرور</label>
+        <input type="password" id="login-password" required autocomplete="current-password">
+      </div>
+      <p class="field-error" id="login-error"></p>
+      <button type="submit" class="btn btn-primary btn-block" id="login-submit">تسجيل الدخول</button>
+    </form>
+    <p class="sub" id="login-config-notice" style="margin-top:18px"></p>
+  </div>
+</div>
+
+<!-- ================= DASHBOARD SHELL ================= -->
+<div class="admin-shell hidden" id="admin-shell">
+  <aside class="admin-sidebar">
+    <div class="brand">
+      <img src="../assets/images/logo.webp" alt="">
+      <span>شواية</span>
+    </div>
+
+    <a class="admin-nav-link" data-route="dashboard" href="#dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+      <span>الرئيسية</span>
+    </a>
+    <a class="admin-nav-link" data-route="products" href="#products">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 17a2.5 2.5 0 0 0 2.5-2.5c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7.5 7.5 0 1 1-15 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+      <span>المنتجات</span>
+    </a>
+    <a class="admin-nav-link" data-route="categories" href="#categories">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+      <span>التصنيفات</span>
+    </a>
+    <a class="admin-nav-link" data-route="options" href="#options">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span>خيارات المنتجات</span>
+    </a>
+    <a class="admin-nav-link" data-route="orders" href="#orders">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h2l2.6 12.6a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L21 8H6"/></svg>
+      <span>الطلبات</span>
+    </a>
+    <a class="admin-nav-link" data-route="offers" href="#offers">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C9 3 12 8 12 8s3-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>
+      <span>العروض</span>
+    </a>
+    <a class="admin-nav-link" data-route="settings" href="#settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.37a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.63 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1.96z"/></svg>
+      <span>إعدادات الموقع</span>
+    </a>
+    <a class="admin-nav-link" data-route="media" href="#media">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      <span>مكتبة الوسائط</span>
+    </a>
+    <a class="admin-nav-link" data-route="seo" href="#seo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <span>SEO</span>
+    </a>
+
+    <div class="spacer"></div>
+    <div style="padding:10px 14px;font-size:12px;color:rgba(255,255,255,.45)" id="admin-user-email"></div>
+    <button type="button" class="admin-logout-btn" id="logout-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      <span>تسجيل الخروج</span>
+    </button>
+  </aside>
+
+  <main class="admin-main">
+
+    <!-- ===== DASHBOARD HOME ===== -->
+    <section class="admin-page" id="page-dashboard">
+      <div class="admin-topbar">
+        <div>
+          <h1>لوحة الرئيسية</h1>
+          <p class="sub">نظرة سريعة على أداء اليوم</p>
+        </div>
+        <div class="open-toggle">
+          <span class="label">حالة المطعم</span>
+          <button type="button" id="open-toggle-btn"><span class="dot"></span><span id="open-toggle-text">مفتوح</span></button>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h2l2.6 12.6a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L21 8H6"/></svg>
+          </div>
+          <div class="stat-value" id="stat-orders-today">—</div>
+          <div class="stat-label">عدد الطلبات اليوم</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="stat-value" id="stat-revenue-today">—</div>
+          <div class="stat-label">إجمالي مبيعات اليوم</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2.5l2.9 6.28 6.6.63-5 4.5 1.5 6.5-6-3.6-6 3.6 1.5-6.5-5-4.5 6.6-.63L12 2.5z"/></svg>
+          </div>
+          <div class="stat-value" id="stat-top-product" style="font-size:var(--fs-md)">—</div>
+          <div class="stat-label">أكثر منتج تم طلبه اليوم</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>آخر الطلبات</h2></div>
+        <div class="table-wrap"><table class="admin-table" id="recent-orders-table"><thead><tr>
+          <th>الوقت</th><th>الأصناف</th><th>الإجمالي</th><th>الحالة</th>
+        </tr></thead><tbody></tbody></table></div>
+        <div class="empty-state hidden" id="recent-orders-empty">لا توجد طلبات بعد</div>
+      </div>
+    </section>
+
+    <!-- ===== PRODUCTS ===== -->
+    <section class="admin-page hidden" id="page-products">
+      <div class="admin-topbar">
+        <div><h1>إدارة المنتجات</h1><p class="sub">إضافة وتعديل وإخفاء الأصناف</p></div>
+        <button type="button" class="btn btn-primary btn-sm" id="add-product-btn">+ إضافة منتج</button>
+      </div>
+      <div class="panel">
+        <div class="table-wrap"><table class="admin-table" id="products-table"><thead><tr>
+          <th></th><th>الاسم</th><th>التصنيف</th><th>السعر</th><th>الشارات</th><th>الحالة</th><th></th>
+        </tr></thead><tbody></tbody></table></div>
+        <div class="empty-state hidden" id="products-empty">لا توجد منتجات بعد</div>
+      </div>
+    </section>
+
+    <!-- ===== CATEGORIES ===== -->
+    <section class="admin-page hidden" id="page-categories">
+      <div class="admin-topbar">
+        <div><h1>إدارة التصنيفات</h1><p class="sub">أقسام المنيو وترتيب ظهورها</p></div>
+        <button type="button" class="btn btn-primary btn-sm" id="add-category-btn">+ إضافة تصنيف</button>
+      </div>
+      <div class="panel">
+        <div class="table-wrap"><table class="admin-table" id="categories-table"><thead><tr>
+          <th>الأيقونة</th><th>الاسم</th><th>الترتيب</th><th>الحالة</th><th></th>
+        </tr></thead><tbody></tbody></table></div>
+        <div class="empty-state hidden" id="categories-empty">لا توجد تصنيفات بعد</div>
+      </div>
+    </section>
+
+    <!-- ===== OPTIONS (customization) ===== -->
+    <section class="admin-page hidden" id="page-options">
+      <div class="admin-topbar">
+        <div><h1>خيارات المنتجات (Customization)</h1><p class="sub">أضف مجموعات خيارات وإضافات لكل منتج</p></div>
+      </div>
+      <div class="panel">
+        <div class="field span-2" style="max-width:420px">
+          <label for="options-product-select">اختر منتجاً</label>
+          <select id="options-product-select"></select>
+        </div>
+      </div>
+      <div id="option-groups-wrap"></div>
+    </section>
+
+    <!-- ===== ORDERS ===== -->
+    <section class="admin-page hidden" id="page-orders">
+      <div class="admin-topbar">
+        <div><h1>إدارة الطلبات</h1><p class="sub">جميع الطلبات الواردة من الموقع</p></div>
+        <div class="gap-8">
+          <select id="orders-status-filter" class="field" style="border:1.5px solid var(--color-border);border-radius:var(--radius-pill);padding:8px 14px;font-size:var(--fs-sm)">
+            <option value="">كل الحالات</option>
+            <option value="new">جديد</option>
+            <option value="preparing">قيد التحضير</option>
+            <option value="ready">جاهز</option>
+            <option value="completed">مكتمل</option>
+            <option value="cancelled">ملغي</option>
+          </select>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="table-wrap"><table class="admin-table" id="orders-table"><thead><tr>
+          <th>الوقت</th><th>الأصناف</th><th>الإجمالي</th><th>الملاحظات</th><th>الحالة</th>
+        </tr></thead><tbody></tbody></table></div>
+        <div class="empty-state hidden" id="orders-empty">لا توجد طلبات</div>
+      </div>
+    </section>
+
+    <!-- ===== OFFERS ===== -->
+    <section class="admin-page hidden" id="page-offers">
+      <div class="admin-topbar">
+        <div><h1>إدارة العروض</h1><p class="sub">بوكسات وعروض محدودة المدة</p></div>
+        <button type="button" class="btn btn-primary btn-sm" id="add-offer-btn">+ إنشاء عرض</button>
+      </div>
+      <div class="panel">
+        <div class="table-wrap"><table class="admin-table" id="offers-table"><thead><tr>
+          <th></th><th>العنوان</th><th>السعر</th><th>البداية</th><th>النهاية</th><th>مفعّل</th><th></th>
+        </tr></thead><tbody></tbody></table></div>
+        <div class="empty-state hidden" id="offers-empty">لا توجد عروض بعد</div>
+      </div>
+    </section>
+
+    <!-- ===== SITE SETTINGS ===== -->
+    <section class="admin-page hidden" id="page-settings">
+      <div class="admin-topbar"><div><h1>إعدادات الموقع</h1><p class="sub">تنعكس فوراً على الموقع دون الحاجة لإعادة نشر</p></div></div>
+      <form class="panel" id="settings-form">
+        <div class="form-grid">
+          <div class="field span-2">
+            <label>الشعار</label>
+            <div class="image-picker">
+              <img class="preview" id="settings-logo-preview" src="../assets/images/logo.webp" alt="">
+              <button type="button" class="btn btn-outline btn-sm" data-pick-image="settings-logo-url">اختر من الوسائط</button>
+            </div>
+            <input type="hidden" id="settings-logo-url">
+          </div>
+          <div class="field span-2">
+            <label>صورة Hero</label>
+            <div class="image-picker">
+              <img class="preview" id="settings-hero-preview" src="../assets/images/hero.webp" alt="">
+              <button type="button" class="btn btn-outline btn-sm" data-pick-image="settings-hero-url">اختر من الوسائط</button>
+            </div>
+            <input type="hidden" id="settings-hero-url">
+          </div>
+          <div class="field"><label for="settings-name">اسم المطعم</label><input id="settings-name" required></div>
+          <div class="field"><label for="settings-whatsapp">رقم الواتساب (بدون +)</label><input id="settings-whatsapp" required placeholder="96890000000"></div>
+          <div class="field span-2"><label for="settings-tagline">الشعار النصي (Tagline)</label><input id="settings-tagline"></div>
+          <div class="field span-2"><label for="settings-description">وصف الموقع</label><textarea id="settings-description" rows="2"></textarea></div>
+          <div class="field"><label for="settings-map">رابط خرائط Google</label><input id="settings-map" type="url"></div>
+          <div class="field"></div>
+          <div class="field"><label for="settings-open-hour">ساعة الفتح (0-23)</label><input id="settings-open-hour" type="number" min="0" max="23" required></div>
+          <div class="field"><label for="settings-close-hour">ساعة الإغلاق (1-24)</label><input id="settings-close-hour" type="number" min="1" max="24" required></div>
+          <div class="field"><label for="settings-prep-min">وقت التحضير الأدنى (دقيقة)</label><input id="settings-prep-min" type="number" min="1" required></div>
+          <div class="field"><label for="settings-prep-max">وقت التحضير الأقصى (دقيقة)</label><input id="settings-prep-max" type="number" min="1" required></div>
+          <div class="field"><label for="settings-instagram">إنستغرام</label><input id="settings-instagram" type="url" placeholder="https://instagram.com/..."></div>
+        </div>
+        <div class="admin-modal-footer">
+          <span class="field-error is-visible" id="settings-save-msg" style="color:#1a936f;display:none"></span>
+          <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ===== MEDIA LIBRARY ===== -->
+    <section class="admin-page hidden" id="page-media">
+      <div class="admin-topbar"><div><h1>مكتبة الوسائط</h1><p class="sub">ارفع الصور مرة واحدة، ثم اخترها لأي منتج أو تصنيف أو عرض</p></div></div>
+      <div class="panel">
+        <div class="media-upload-zone" id="media-upload-zone">
+          <input type="file" id="media-file-input" accept="image/*" multiple class="hidden">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6"/><path d="M4 20h16"/></svg>
+          <p>اسحب الصور هنا أو اضغط للاختيار</p>
+        </div>
+        <div class="media-grid" id="media-grid"></div>
+        <div class="empty-state hidden" id="media-empty">لا توجد صور بعد</div>
+      </div>
+    </section>
+
+    <!-- ===== SEO ===== -->
+    <section class="admin-page hidden" id="page-seo">
+      <div class="admin-topbar"><div><h1>إعدادات SEO</h1><p class="sub">كيف يظهر الموقع في نتائج البحث ومشاركات التواصل</p></div></div>
+      <form class="panel" id="seo-form">
+        <div class="form-grid">
+          <div class="field span-2"><label for="seo-title">Title</label><input id="seo-title" required></div>
+          <div class="field span-2"><label for="seo-description">Description</label><textarea id="seo-description" rows="3"></textarea></div>
+          <div class="field span-2"><label for="seo-keywords">Keywords (مفصولة بفواصل)</label><input id="seo-keywords"></div>
+          <div class="field span-2">
+            <label>Open Graph Image</label>
+            <div class="image-picker">
+              <img class="preview" id="seo-og-preview" src="../assets/images/hero.webp" alt="">
+              <button type="button" class="btn btn-outline btn-sm" data-pick-image="seo-og-url">اختر من الوسائط</button>
+            </div>
+            <input type="hidden" id="seo-og-url">
+          </div>
+          <div class="field span-2">
+            <label>Favicon</label>
+            <div class="image-picker">
+              <img class="preview" id="seo-favicon-preview" src="../assets/images/logo.webp" alt="">
+              <button type="button" class="btn btn-outline btn-sm" data-pick-image="seo-favicon-url">اختر من الوسائط</button>
+            </div>
+            <input type="hidden" id="seo-favicon-url">
+          </div>
+        </div>
+        <div class="admin-modal-footer">
+          <span class="field-error is-visible" id="seo-save-msg" style="color:#1a936f;display:none"></span>
+          <button type="submit" class="btn btn-primary">حفظ إعدادات SEO</button>
+        </div>
+      </form>
+    </section>
+
+  </main>
+</div>
+
+<!-- ================= PRODUCT MODAL ================= -->
+<div class="admin-modal-overlay" id="product-modal-overlay">
+  <div class="admin-modal wide">
+    <div class="admin-modal-header"><h2 id="product-modal-title">إضافة منتج</h2>
+      <button type="button" class="icon-btn" data-close-modal="product-modal-overlay">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <form id="product-form">
+      <input type="hidden" id="pf-id">
+      <div class="form-grid">
+        <div class="field span-2">
+          <label>صورة المنتج</label>
+          <div class="image-picker">
+            <img class="preview" id="pf-image-preview" src="" alt="">
+            <button type="button" class="btn btn-outline btn-sm" data-pick-image="pf-image-url">اختر من الوسائط</button>
+          </div>
+          <input type="hidden" id="pf-image-url">
+        </div>
+        <div class="field span-2"><label for="pf-name">اسم المنتج</label><input id="pf-name" required></div>
+        <div class="field span-2"><label for="pf-desc">الوصف</label><textarea id="pf-desc" rows="2"></textarea></div>
+        <div class="field"><label for="pf-price">السعر (ر.ع)</label><input id="pf-price" type="number" step="0.001" min="0" required></div>
+        <div class="field"><label for="pf-category">التصنيف</label><select id="pf-category" required></select></div>
+        <div class="field"><label for="pf-sort">ترتيب الظهور</label><input id="pf-sort" type="number" value="0"></div>
+        <div class="field" style="align-self:end">
+          <label class="checkbox-row"><input type="checkbox" id="pf-available" checked> متاح للطلب</label>
+        </div>
+        <div class="field span-2">
+          <label class="checkbox-row"><input type="checkbox" id="pf-track-stock"> إخفاء المنتج تلقائياً عند نفاد الكمية</label>
+        </div>
+        <div class="field span-2 hidden" id="pf-stock-qty-field"><label for="pf-stock-qty">الكمية المتوفرة</label><input id="pf-stock-qty" type="number" min="0"></div>
+        <div class="field span-2">
+          <label>الشارات</label>
+          <div class="badge-picker" id="pf-badges"></div>
+        </div>
+      </div>
+      <div class="admin-modal-footer">
+        <button type="button" class="btn btn-outline" data-close-modal="product-modal-overlay">إلغاء</button>
+        <button type="submit" class="btn btn-primary">حفظ المنتج</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= CATEGORY MODAL ================= -->
+<div class="admin-modal-overlay" id="category-modal-overlay">
+  <div class="admin-modal">
+    <div class="admin-modal-header"><h2 id="category-modal-title">إضافة تصنيف</h2>
+      <button type="button" class="icon-btn" data-close-modal="category-modal-overlay">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <form id="category-form">
+      <input type="hidden" id="cf-id">
+      <div class="form-grid">
+        <div class="field span-2"><label for="cf-name">اسم التصنيف</label><input id="cf-name" required></div>
+        <div class="field"><label for="cf-sort">الترتيب</label><input id="cf-sort" type="number" value="0"></div>
+        <div class="field" style="align-self:end"><label class="checkbox-row"><input type="checkbox" id="cf-active" checked> نشط</label></div>
+        <div class="field span-2">
+          <label>الأيقونة</label>
+          <div class="icon-picker" id="cf-icon-picker"></div>
+          <input type="hidden" id="cf-icon" value="flame">
+        </div>
+      </div>
+      <div class="admin-modal-footer">
+        <button type="button" class="btn btn-outline" data-close-modal="category-modal-overlay">إلغاء</button>
+        <button type="submit" class="btn btn-primary">حفظ التصنيف</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= OFFER MODAL ================= -->
+<div class="admin-modal-overlay" id="offer-modal-overlay">
+  <div class="admin-modal">
+    <div class="admin-modal-header"><h2 id="offer-modal-title">إنشاء عرض</h2>
+      <button type="button" class="icon-btn" data-close-modal="offer-modal-overlay">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <form id="offer-form">
+      <input type="hidden" id="of-id">
+      <div class="form-grid">
+        <div class="field span-2">
+          <label>صورة العرض</label>
+          <div class="image-picker">
+            <img class="preview" id="of-image-preview" src="" alt="">
+            <button type="button" class="btn btn-outline btn-sm" data-pick-image="of-image-url">اختر من الوسائط</button>
+          </div>
+          <input type="hidden" id="of-image-url">
+        </div>
+        <div class="field span-2"><label for="of-title">عنوان العرض</label><input id="of-title" required></div>
+        <div class="field span-2"><label for="of-desc">الوصف</label><textarea id="of-desc" rows="2"></textarea></div>
+        <div class="field"><label for="of-price">السعر (ر.ع)</label><input id="of-price" type="number" step="0.001" min="0" required></div>
+        <div class="field" style="align-self:end"><label class="checkbox-row"><input type="checkbox" id="of-active" checked> مفعّل</label></div>
+        <div class="field"><label for="of-start">تاريخ البداية</label><input id="of-start" type="date"></div>
+        <div class="field"><label for="of-end">تاريخ النهاية</label><input id="of-end" type="date"></div>
+      </div>
+      <div class="admin-modal-footer">
+        <button type="button" class="btn btn-outline" data-close-modal="offer-modal-overlay">إلغاء</button>
+        <button type="submit" class="btn btn-primary">حفظ العرض</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= ORDER DETAIL MODAL ================= -->
+<div class="admin-modal-overlay" id="order-modal-overlay">
+  <div class="admin-modal">
+    <div class="admin-modal-header"><h2>تفاصيل الطلب</h2>
+      <button type="button" class="icon-btn" data-close-modal="order-modal-overlay">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div id="order-detail-body"></div>
+    <div class="admin-modal-footer">
+      <select id="order-status-select" class="field" style="border:1.5px solid var(--color-border);border-radius:var(--radius-sm);padding:9px 12px">
+        <option value="new">جديد</option>
+        <option value="preparing">قيد التحضير</option>
+        <option value="ready">جاهز</option>
+        <option value="completed">مكتمل</option>
+        <option value="cancelled">ملغي</option>
+      </select>
+      <button type="button" class="btn btn-primary" id="order-status-save">تحديث الحالة</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MEDIA PICKER MODAL ================= -->
+<div class="admin-modal-overlay" id="media-picker-overlay">
+  <div class="admin-modal wide">
+    <div class="admin-modal-header"><h2>اختر صورة</h2>
+      <button type="button" class="icon-btn" data-close-modal="media-picker-overlay">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="media-upload-zone" id="picker-upload-zone" style="padding:18px">
+      <input type="file" id="picker-file-input" accept="image/*" multiple class="hidden">
+      <p style="font-size:var(--fs-sm)">ارفع صورة جديدة أو اختر من الأسفل</p>
+    </div>
+    <div class="media-grid" id="media-picker-grid"></div>
+  </div>
+</div>
+
+<div class="toast" id="admin-toast" role="status" aria-live="polite"></div>
+
+<script src="../config.js"></script>
+<script src="../js/icons.js"></script>
+<script src="js/admin-api.js" defer></script>
+<script src="js/admin-ui.js" defer></script>
+<script src="js/admin-media.js" defer></script>
+<script src="js/admin-dashboard.js" defer></script>
+<script src="js/admin-categories.js" defer></script>
+<script src="js/admin-products.js" defer></script>
+<script src="js/admin-options.js" defer></script>
+<script src="js/admin-orders.js" defer></script>
+<script src="js/admin-offers.js" defer></script>
+<script src="js/admin-settings.js" defer></script>
+<script src="js/admin-seo.js" defer></script>
+<script src="js/admin-router.js" defer></script>
+<script src="js/admin-auth.js" defer></script>
+</body>
+</html>

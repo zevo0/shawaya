@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title id="meta-title">شواية | Shawaya — أصل المشاوي العربية على الفحم</title>
+<meta id="meta-description" name="description" content="شواية: مشاوي عربية أصيلة تُشوى على الفحم الحقيقي وتصل طازجة ومقرمشة. اطلب الآن للاستلام من الفرع عبر واتساب.">
+<meta id="meta-keywords" name="keywords" content="شواية, مشاوي, مطعم مشاوي, شاورما, كباب, مشاوي فحم, طلب استلام">
+<meta name="author" content="شواية">
+<link rel="canonical" href="https://www.shawaya.example/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="restaurant.menu">
+<meta id="og-title" property="og:title" content="شواية | Shawaya — أصل المشاوي العربية">
+<meta id="og-description" property="og:description" content="نكهة الفحم الحقيقي، تحضر فوراً لتصلك طازجة ومقرمشة. تصفح المنيو واطلب الآن.">
+<meta id="og-image" property="og:image" content="assets/images/hero.webp">
+<meta property="og:locale" content="ar_AR">
+<meta id="og-site-name" property="og:site_name" content="شواية">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta id="twitter-title" name="twitter:title" content="شواية | Shawaya">
+<meta id="twitter-description" name="twitter:description" content="نكهة الفحم الحقيقي، تحضر فوراً لتصلك طازجة ومقرمشة.">
+<meta id="twitter-image" name="twitter:image" content="assets/images/hero.webp">
+
+<meta name="theme-color" content="#D35400">
+<link id="favicon-link" rel="icon" type="image/webp" href="assets/images/logo.webp">
+<link id="apple-touch-icon-link" rel="apple-touch-icon" href="assets/images/logo.webp">
+<link rel="manifest" href="manifest.json">
+
+<!-- Preconnect / fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<!-- Supabase client (only used if config.js has url/anonKey set) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+
+<!-- Styles (loaded in dependency order) -->
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+
+<!-- Structured data: Restaurant -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "شواية",
+  "alternateName": "Shawaya",
+  "servesCuisine": ["Arabic", "Grill", "Middle Eastern"],
+  "priceRange": "$$",
+  "image": "assets/images/hero.webp",
+  "logo": "assets/images/logo.webp",
+  "acceptsReservations": "False",
+  "menu": "https://www.shawaya.example/#menu",
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+    "opens": "12:00",
+    "closes": "00:00"
+  }
+}
+</script>
+</head>
+<body>
+
+<a href="#menu-sections" class="skip-link">تخطَّ إلى المنيو</a>
+
+<!-- Loading screen -->
+<div id="loading-screen" aria-hidden="true">
+  <div>
+    <img class="loading-mark" src="assets/images/logo.webp" alt="" width="96" height="96">
+    <p>شواية</p>
+  </div>
+</div>
+
+<!-- ================= HEADER ================= -->
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a href="#top" class="brand" aria-label="شواية — الصفحة الرئيسية">
+      <img class="brand-logo" id="brand-logo-img" src="assets/images/logo.webp" alt="شعار شواية" width="46" height="46">
+      <span class="brand-name" id="brand-name-text">شواية</span>
+    </a>
+
+    <nav class="nav-categories" id="nav-categories-inline" aria-label="أقسام المنيو"></nav>
+
+    <div class="header-actions">
+      <a href="tel:+96890992253" id="call-btn" class="icon-btn" aria-label="اتصل بنا">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
+      </a>
+      <a href="#" id="map-pin-btn" class="icon-btn map-pin-btn" target="_blank" rel="noopener" aria-label="موقعنا على خرائط جوجل">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+      </a>
+      <a href="#" id="whatsapp-fab-header" class="icon-btn" style="color:#25D366" aria-label="تواصل عبر واتساب" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.83 14.13c-.24.68-1.4 1.3-1.93 1.38-.5.08-1.12.11-1.8-.11-.42-.13-.96-.31-1.65-.6-2.9-1.25-4.8-4.16-4.94-4.35-.14-.19-1.18-1.57-1.18-3 0-1.42.75-2.12 1.02-2.41.27-.29.58-.36.78-.36.19 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.15.12.32.02.51-.1.19-.15.31-.29.48-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.75 1.24 1.62 2.01 1.11.99 2.05 1.3 2.34 1.45.29.15.46.13.63-.08.17-.2.72-.84.91-1.13.19-.29.38-.24.63-.15.26.1 1.66.79 1.94.93.29.15.48.22.55.34.07.13.07.75-.17 1.43z"/></svg>
+      </a>
+      <button type="button" class="cart-fab" id="cart-fab" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h2l2.6 12.6a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L21 8H6"/></svg>
+        <span>السلة</span>
+        <span class="cart-count" id="cart-count" hidden>0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero" aria-label="الصفحة الرئيسية">
+    <div class="hero-media">
+      <img id="hero-img" src="assets/images/hero.webp" alt="طبق مشاوي شواية الفاخر يقدم مع المقبلات والخبز الطازج على أجواء عربية دافئة" width="1376" height="768" fetchpriority="high">
+    </div>
+    <div class="hero-content">
+      <img class="hero-logo" id="hero-logo-img" src="assets/images/logo.webp" alt="" width="84" height="84">
+      <div class="hero-status" id="hero-status">مفتوح الآن</div>
+      <h1 id="hero-title">شواية</h1>
+      <p class="hero-sub" id="hero-tagline">نكهة الفحم الحقيقي، تحضر فوراً لتصلك طازجة ومقرمشة.</p>
+      <div class="hero-actions">
+        <button type="button" class="btn btn-primary" id="hero-order-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 17a2.5 2.5 0 0 0 2.5-2.5c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7.5 7.5 0 1 1-15 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+          اطلب الآن
+        </button>
+        <button type="button" class="btn btn-ghost" id="hero-browse-btn">تصفح المنيو</button>
+      </div>
+    </div>
+    <div class="scroll-indicator" aria-hidden="true">
+      <span>مرر للأسفل</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </div>
+  </section>
+
+  <!-- ================= CATEGORY NAV ================= -->
+  <nav class="category-nav" aria-label="الانتقال السريع بين الأقسام">
+    <div class="container">
+      <div class="category-scroller" id="category-scroller"></div>
+    </div>
+  </nav>
+
+  <!-- ================= MENU ================= -->
+  <div id="menu-sections" aria-live="polite"></div>
+
+  <!-- ================= OFFERS STRIP ================= -->
+  <section class="offers-strip" id="offers-strip">
+    <div class="container">
+      <div class="section-heading reveal">
+        <span class="eyebrow">عروض اليوم</span>
+        <h2>بوكسات وعروض بأسعار مميزة</h2>
+        <p>وجبات مُعدّة خصيصاً لتجربة أوفر وأشهى.</p>
+      </div>
+      <div class="offers-scroller" id="offers-scroller"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <img class="footer-logo" id="footer-logo-img" src="assets/images/logo.webp" alt="شعار شواية" width="52" height="52">
+        <p id="footer-description">شواية — أصل المشاوي العربية على الفحم. نطهو كل طبق طازجاً عند الطلب لتصلك أشهى النكهات.</p>
+        <div class="footer-social" id="footer-social">
+          <a href="#" id="social-instagram" aria-label="إنستغرام شواية" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>الأقسام</h4>
+        <ul id="footer-categories"></ul>
+      </div>
+      <div class="footer-col">
+        <h4>تواصل معنا</h4>
+        <ul>
+          <li><a href="#" id="footer-whatsapp">واتساب: اطلب الآن</a></li>
+          <li><a href="#" id="footer-map">الموقع على الخريطة</a></li>
+          <li><a href="#top">العودة للأعلى</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 شواية. جميع الحقوق محفوظة.</span>
+      <span>استلام من الفرع فقط — بدون توصيل حالياً</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ================= WHATSAPP FAB ================= -->
+<a href="#" class="whatsapp-fab" id="whatsapp-fab" aria-label="اطلب عبر واتساب">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.83 14.13c-.24.68-1.4 1.3-1.93 1.38-.5.08-1.12.11-1.8-.11-.42-.13-.96-.31-1.65-.6-2.9-1.25-4.8-4.16-4.94-4.35-.14-.19-1.18-1.57-1.18-3 0-1.42.75-2.12 1.02-2.41.27-.29.58-.36.78-.36.19 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.15.12.32.02.51-.1.19-.15.31-.29.48-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.75 1.24 1.62 2.01 1.11.99 2.05 1.3 2.34 1.45.29.15.46.13.63-.08.17-.2.72-.84.91-1.13.19-.29.38-.24.63-.15.26.1 1.66.79 1.94.93.29.15.48.22.55.34.07.13.07.75-.17 1.43z"/></svg>
+</a>
+
+<!-- ================= ITEM MODAL ================= -->
+<div class="modal-overlay" id="modal-overlay"></div>
+<div class="item-modal" id="item-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <button type="button" class="modal-close" aria-label="إغلاق">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+  <div class="modal-media">
+    <img src="" alt="" id="modal-image">
+  </div>
+  <div class="modal-scroll">
+    <div id="modal-badges" class="badge-row" style="position:static"></div>
+    <h2 id="modal-title"></h2>
+    <p class="modal-desc" id="modal-desc"></p>
+    <span class="modal-base-price" id="modal-base-price"></span>
+
+    <div id="modal-option-groups"></div>
+
+    <div class="modal-notes">
+      <label for="modal-notes-input" style="font-weight:700;font-size:.875rem;display:block;margin-bottom:8px">ملاحظات على هذا الصنف</label>
+      <textarea id="modal-notes-input" placeholder="مثال: بدون بصل، تتبيلة خفيفة..."></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="qty-stepper">
+      <button type="button" id="modal-qty-minus" aria-label="إنقاص الكمية">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+      </button>
+      <span id="modal-qty">1</span>
+      <button type="button" id="modal-qty-plus" aria-label="زيادة الكمية">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <button type="button" class="btn btn-primary btn-block" id="modal-add-to-cart">
+      أضف إلى السلة
+      <span class="modal-total" id="modal-total-wrap">— <span id="modal-total-price"></span></span>
+    </button>
+  </div>
+</div>
+
+<!-- ================= CART DRAWER ================= -->
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-drawer" id="cart-drawer" role="dialog" aria-modal="true" aria-label="سلة الطلبات">
+  <div class="cart-header">
+    <h2>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h2l2.6 12.6a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L21 8H6"/></svg>
+      سلتك
+    </h2>
+    <button type="button" class="icon-btn" id="cart-close" aria-label="إغلاق السلة">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="cart-body" id="cart-body"></div>
+  <div class="cart-footer" id="cart-footer" style="display:none">
+    <p id="cart-closed-banner" class="text-muted" style="display:none;text-align:center;font-size:var(--fs-sm);font-weight:700;color:#c0392b;background:rgba(192,57,43,.08);padding:10px;border-radius:var(--radius-sm)">المطعم مغلق حالياً — لا يمكن إتمام الطلب الآن</p>
+    <div class="cart-summary-row"><span>المجموع الفرعي</span><span id="cart-subtotal">0.000 ر.ع</span></div>
+    <div class="cart-summary-row total"><span>الإجمالي</span><span id="cart-total">0.000 ر.ع</span></div>
+    <div class="cart-footer-actions">
+      <button type="button" class="btn btn-primary btn-block" id="checkout-whatsapp">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="20" height="20"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.83 14.13c-.24.68-1.4 1.3-1.93 1.38-.5.08-1.12.11-1.8-.11-.42-.13-.96-.31-1.65-.6-2.9-1.25-4.8-4.16-4.94-4.35-.14-.19-1.18-1.57-1.18-3 0-1.42.75-2.12 1.02-2.41.27-.29.58-.36.78-.36.19 0 .39 0 .56.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.15.12.32.02.51-.1.19-.15.31-.29.48-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.75 1.24 1.62 2.01 1.11.99 2.05 1.3 2.34 1.45.29.15.46.13.63-.08.17-.2.72-.84.91-1.13.19-.29.38-.24.63-.15.26.1 1.66.79 1.94.93.29.15.48.22.55.34.07.13.07.75-.17 1.43z"/></svg>
+        إتمام الطلب عبر واتساب
+      </button>
+    </div>
+    <button type="button" class="clear-cart-btn" id="clear-cart-btn">تفريغ السلة</button>
+  </div>
+</aside>
+
+<!-- ================= TOAST ================= -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- Scripts (deferred, load order matters for module deps) -->
+<script src="config.js" defer></script>
+<script src="js/icons.js" defer></script>
+<script src="js/supabase.js" defer></script>
+<script src="js/menu.js" defer></script>
+<script src="js/modal.js" defer></script>
+<script src="js/cart.js" defer></script>
+<script src="js/whatsapp.js" defer></script>
+<script src="js/app.js" defer></script>
+</body>
+</html>

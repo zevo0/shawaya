@@ -1,0 +1,17 @@
+{
+  "name": "شواية | Shawaya",
+  "short_name": "شواية",
+  "description": "مشاوي عربية أصيلة تُشوى على الفحم الحقيقي — اطلب الآن للاستلام من الفرع.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FDFBF7",
+  "theme_color": "#D35400",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    { "src": "assets/images/logo.webp", "sizes": "192x192", "type": "image/webp", "purpose": "any" },
+    { "src": "assets/images/logo.webp", "sizes": "512x512", "type": "image/webp", "purpose": "any" }
+  ]
+}

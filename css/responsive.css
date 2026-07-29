@@ -1,0 +1,81 @@
+/* =========================================================================
+   responsive.css — Breakpoints, container queries, fluid adjustments
+   ========================================================================= */
+
+/* ---- Desktop: category nav is the sole in-header navigation ------------ */
+@media (min-width: 1101px) {
+  .nav-categories { display: flex; }
+}
+
+/* ---- Tablet / small desktop --------------------------------------------- */
+@media (max-width: 1100px) {
+  .nav-categories { display: flex; }
+}
+
+/* ---- Large tablet --------------------------------------------------------*/
+@media (max-width: 900px) {
+  .item-modal { grid-template-columns: 1fr; overflow-y: auto; }
+  .modal-media { min-height: 220px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .footer-brand { grid-column: 1 / -1; }
+}
+
+/* ---- Mobile ---------------------------------------------------------- */
+@media (max-width: 720px) {
+  :root { --header-h: 72px; --header-h-shrunk: 58px; }
+
+  .brand-name { display: none; }
+  .nav-categories { display: none; } /* replaced by sticky category-nav lower on page */
+
+  .hero { min-height: 86svh; padding-bottom: 30px; }
+  .hero-content { padding-block: 88px 92px; align-items: stretch; }
+  .hero-actions { flex-direction: column; }
+  .hero-actions .btn { width: 100%; }
+  .scroll-indicator { bottom: 44px; }
+  .hero::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 30px;
+    background: var(--color-bg);
+    border-radius: 26px 26px 0 0;
+  }
+
+  .modal-footer { padding: 14px 18px 20px; flex-wrap: wrap; }
+  .modal-scroll { padding: 22px 18px 100px; }
+
+  .cart-drawer { width: 100vw; }
+
+  .footer-grid { grid-template-columns: 1fr; gap: 30px; }
+  .footer-bottom { flex-direction: column; text-align: center; }
+
+  .menu-grid { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 16px; }
+  .item-card-body { padding: 14px 16px 16px; gap: 8px; }
+  .item-card-body h3 { font-size: var(--fs-sm); }
+  .quick-add-btn span { display: none; }
+  .quick-add-btn { padding: 12px; }
+
+  .whatsapp-fab { bottom: 18px; inset-inline-start: 18px; width: 52px; height: 52px; }
+  .whatsapp-fab svg { width: 26px; height: 26px; }
+}
+
+/* ---- Very small phones (320–375px) --------------------------------------*/
+@media (max-width: 380px) {
+  .container, .header-inner { width: calc(100% - 24px); }
+  .hero-content h1 { font-size: 2.1rem; }
+  .menu-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+}
+
+/* ---- Ultra-wide ------------------------------------------------------ */
+@media (min-width: 1920px) {
+  :root { --container: 1440px; }
+  .menu-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+}
+
+/* ---- Card container queries (adapts inside narrow sidebars, etc.) ------ */
+.menu-grid { container-type: inline-size; }
+
+/* ---- Print --------------------------------------------------------------*/
+@media print {
+  .site-header, .cart-drawer, .whatsapp-fab, .modal-overlay, .item-modal, .scroll-indicator { display: none !important; }
+}
