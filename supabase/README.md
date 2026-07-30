@@ -73,3 +73,15 @@ alter table public.settings drop column if exists tiktok_url;
 alter table public.settings drop column if exists snapchat_url;
 ```
 
+## تحديث: حذف قسم "عروض اليوم" (جدول offers)
+تم حذف الشريط المنفصل "عروض اليوم" من الموقع ولوحة التحكم، لأن فئة **العروض
+والبوكسات** ضمن التصنيفات العادية تغطي نفس الغرض دون ازدواجية. جدول
+`public.offers` لم يعد يُنشأ في `schema.sql` للمشاريع الجديدة. إن كان مشروع
+Supabase الخاص بك يعمل مسبقاً ولديه هذا الجدول، يمكنك حذفه نهائياً بتنفيذ هذا
+الأمر مرة واحدة داخل **SQL Editor** (اختياري — الموقع يعمل بشكل طبيعي حتى لو
+تركته دون حذف، فهو ببساطة لم يعد مقروءاً من أي مكان):
+
+```sql
+drop table if exists public.offers;
+```
+

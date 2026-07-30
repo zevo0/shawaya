@@ -172,15 +172,15 @@ body.admin-body {
 .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: var(--fs-sm); font-weight: 600; }
 .checkbox-row input { width: 18px; height: 18px; accent-color: var(--color-primary); }
 
-.badge-picker, .icon-picker { display: flex; flex-wrap: wrap; gap: 8px; }
-.badge-pick, .icon-pick {
+.badge-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.badge-pick {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 8px 12px; border-radius: var(--radius-pill);
   border: 1.5px solid var(--color-border); font-size: 12px; font-weight: 700;
   cursor: pointer; transition: all .2s;
 }
-.badge-pick svg, .icon-pick svg { width: 15px; height: 15px; }
-.badge-pick.is-selected, .icon-pick.is-selected { border-color: var(--color-primary); background: rgba(var(--color-primary-rgb),.08); color: var(--color-primary); }
+.badge-pick svg { width: 15px; height: 15px; }
+.badge-pick.is-selected { border-color: var(--color-primary); background: rgba(var(--color-primary-rgb),.08); color: var(--color-primary); }
 
 .image-picker { display: flex; align-items: center; gap: 14px; }
 .image-picker .preview { width: 84px; height: 84px; border-radius: 14px; object-fit: cover; background: var(--color-bg); border: 1.5px solid var(--color-border); }

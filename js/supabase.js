@@ -18,18 +18,16 @@ const ShawayaData = (() => {
   const isLive = Boolean(cfg.url && cfg.anonKey && window.supabase);
   const client = isLive ? window.supabase.createClient(cfg.url, cfg.anonKey) : null;
 
-  /* ---- Menu (categories + products + option groups/options + offers) - */
+  /* ---- Menu (categories + products + option groups/options) ------------ */
   async function fetchMenu() {
     if (!isLive) return { ...window.SHAWAYA_SAMPLE_DATA, isLive: false };
     try {
-      const [{ data: categories, error: e1 }, { data: products, error: e2 }, { data: offers, error: e3 }] = await Promise.all([
+      const [{ data: categories, error: e1 }, { data: products, error: e2 }] = await Promise.all([
         client.from('categories').select('*').eq('is_active', true).order('sort_order'),
         client.from('products').select('*, option_groups(*, product_options(*))').eq('is_available', true).order('sort_order'),
-        client.from('offers').select('*').eq('is_active', true).order('sort_order'),
       ]);
-      if (e1 || e2 || e3) throw (e1 || e2 || e3);
+      if (e1 || e2) throw (e1 || e2);
 
-      const now = new Date().toISOString().slice(0, 10);
       const shapedProducts = (products || [])
         .filter(p => !p.track_stock || (p.stock_qty ?? 0) > 0)
         .map(p => ({
@@ -49,14 +47,9 @@ const ShawayaData = (() => {
             })),
         }));
 
-      const shapedOffers = (offers || [])
-        .filter(o => (!o.starts_at || o.starts_at <= now) && (!o.ends_at || o.ends_at >= now))
-        .map(o => ({ id: o.id, title_ar: o.title_ar, description_ar: o.description_ar || '', price: Number(o.price), image_url: o.image_url || '' }));
-
       return {
         categories: (categories || []).map(c => ({ id: c.id, name_ar: c.name_ar, icon: c.icon })),
         products: shapedProducts,
-        offers: shapedOffers,
         isLive: true,
       };
     } catch (err) {
@@ -80,13 +73,13 @@ const ShawayaData = (() => {
 
   function subscribeToChanges(onChange) {
     if (!isLive) return () => {};
+    const notify = (table) => (payload) => onChange({ table, payload });
     const channel = client.channel('public-site-sync')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, onChange)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, onChange)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, onChange)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'offers' }, onChange)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'option_groups' }, onChange)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'product_options' }, onChange)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, notify('settings'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, notify('products'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, notify('categories'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'option_groups' }, notify('option_groups'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'product_options' }, notify('product_options'))
       .subscribe();
     return () => client.removeChannel(channel);
   }

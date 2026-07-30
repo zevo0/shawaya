@@ -37,28 +37,6 @@ const AdminAPI = (() => {
     return data;
   }
 
-  /* ---- Generic upsert: UPDATE if `id` is present, INSERT otherwise ----
-     IMPORTANT: we never use Supabase's `.upsert()` here. `.upsert()` is a
-     real `INSERT ... ON CONFLICT DO UPDATE` under the hood, and Postgres
-     validates NOT NULL constraints on the full attempted row *before* the
-     conflict/update path even runs — so a partial payload like
-     { id, is_available } would fail with "null value in column name_ar
-     violates not-null constraint" even though the row already exists and
-     name_ar already has a value. A plain `.update()` only touches the
-     columns we actually send, so partial edits (toggling one field) are
-     always safe. */
-  async function upsertRow(tableName, row) {
-    if (row.id) {
-      const { id, ...patch } = row;
-      const { data, error } = await table(tableName).update(patch).eq('id', id).select().single();
-      if (error) throw error;
-      return data;
-    }
-    const { data, error } = await table(tableName).insert(row).select().single();
-    if (error) throw error;
-    return data;
-  }
-
   /* ---- Settings -------------------------------------------------------*/
   async function getSettings() {
     const { data, error } = await table('settings').select('*').eq('id', 1).single();
@@ -74,7 +52,11 @@ const AdminAPI = (() => {
 
   /* ---- Categories -------------------------------------------------- */
   async function listCategories() { return listAll('categories'); }
-  async function upsertCategory(row) { return upsertRow('categories', row); }
+  async function upsertCategory(row) {
+    const { data, error } = await table('categories').upsert(row).select().single();
+    if (error) throw error;
+    return data;
+  }
   async function deleteCategory(id) {
     const { error } = await table('categories').delete().eq('id', id);
     if (error) throw error;
@@ -88,29 +70,33 @@ const AdminAPI = (() => {
     if (error) throw error;
     return data;
   }
-  async function upsertProduct(row) { return upsertRow('products', row); }
+  async function upsertProduct(row) {
+    const { data, error } = await table('products').upsert(row).select().single();
+    if (error) throw error;
+    return data;
+  }
   async function deleteProduct(id) {
     const { error } = await table('products').delete().eq('id', id);
     if (error) throw error;
   }
 
   /* ---- Option groups / options ----------------------------------------*/
-  async function upsertOptionGroup(row) { return upsertRow('option_groups', row); }
+  async function upsertOptionGroup(row) {
+    const { data, error } = await table('option_groups').upsert(row).select().single();
+    if (error) throw error;
+    return data;
+  }
   async function deleteOptionGroup(id) {
     const { error } = await table('option_groups').delete().eq('id', id);
     if (error) throw error;
   }
-  async function upsertOption(row) { return upsertRow('product_options', row); }
+  async function upsertOption(row) {
+    const { data, error } = await table('product_options').upsert(row).select().single();
+    if (error) throw error;
+    return data;
+  }
   async function deleteOption(id) {
     const { error } = await table('product_options').delete().eq('id', id);
-    if (error) throw error;
-  }
-
-  /* ---- Offers ---------------------------------------------------------*/
-  async function listOffers() { return listAll('offers'); }
-  async function upsertOffer(row) { return upsertRow('offers', row); }
-  async function deleteOffer(id) {
-    const { error } = await table('offers').delete().eq('id', id);
     if (error) throw error;
   }
 
@@ -134,13 +120,37 @@ const AdminAPI = (() => {
     if (error) throw error;
     return data;
   }
+  /**
+   * Converts any uploaded image (jpg/png/etc.) to WebP in the browser
+   * before it ever reaches Supabase Storage, so only WebP files are
+   * ever saved. Falls back to the original file if conversion fails
+   * (e.g. already WebP, or an unsupported/broken image).
+   */
+  async function toWebp(file, quality = 0.9) {
+    if (file.type === 'image/webp') return file;
+    try {
+      const bitmap = await createImageBitmap(file);
+      const canvas = document.createElement('canvas');
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(bitmap, 0, 0);
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', quality));
+      if (!blob) return file;
+      const base = file.name.replace(/\.[^.]+$/, '');
+      return new File([blob], `${base}.webp`, { type: 'image/webp' });
+    } catch {
+      return file;
+    }
+  }
+
   async function uploadMedia(file) {
-    const ext = file.name.split('.').pop();
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const { error: upErr } = await requireClient().storage.from('media').upload(path, file, { upsert: false });
+    const webpFile = await toWebp(file);
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
+    const { error: upErr } = await requireClient().storage.from('media').upload(path, webpFile, { upsert: false, contentType: 'image/webp' });
     if (upErr) throw upErr;
     const { data: pub } = requireClient().storage.from('media').getPublicUrl(path);
-    const { data, error } = await table('media').insert({ url: pub.publicUrl, path, filename: file.name }).select().single();
+    const { data, error } = await table('media').insert({ url: pub.publicUrl, path, filename: webpFile.name }).select().single();
     if (error) throw error;
     return data;
   }
@@ -189,7 +199,6 @@ const AdminAPI = (() => {
     listCategories, upsertCategory, deleteCategory,
     listProducts, upsertProduct, deleteProduct,
     upsertOptionGroup, deleteOptionGroup, upsertOption, deleteOption,
-    listOffers, upsertOffer, deleteOffer,
     listOrders, updateOrderStatus,
     listMedia, uploadMedia, deleteMedia,
     dashboardStats,

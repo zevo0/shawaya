@@ -1,5 +1,5 @@
 /**
- * admin-categories.js — Categories CRUD (add/edit/delete/reorder/icon).
+ * admin-categories.js — Categories CRUD (add/edit/delete/reorder).
  */
 const AdminCategories = (() => {
   let cache = [];
@@ -15,7 +15,6 @@ const AdminCategories = (() => {
     const empty = document.getElementById('categories-empty');
     tbody.innerHTML = cache.map(c => `
       <tr data-id="${c.id}">
-        <td><span style="color:var(--color-primary)">${icon(c.icon)}</span></td>
         <td>${AdminUI.escapeHtml(c.name_ar)}</td>
         <td>${c.sort_order}</td>
         <td>${c.is_active ? '<span class="chip chip-available">نشط</span>' : '<span class="chip chip-hidden">غير نشط</span>'}</td>
@@ -36,8 +35,6 @@ const AdminCategories = (() => {
     document.getElementById('cf-name').value = category?.name_ar || '';
     document.getElementById('cf-sort').value = category?.sort_order ?? cache.length;
     document.getElementById('cf-active').checked = category ? category.is_active : true;
-    document.getElementById('cf-icon').value = category?.icon || 'flame';
-    AdminUI.renderIconPicker(document.getElementById('cf-icon-picker'), document.getElementById('cf-icon'), category?.icon || 'flame');
     AdminUI.openModal('category-modal-overlay');
   }
 
@@ -48,7 +45,6 @@ const AdminCategories = (() => {
       name_ar: document.getElementById('cf-name').value.trim(),
       sort_order: Number(document.getElementById('cf-sort').value) || 0,
       is_active: document.getElementById('cf-active').checked,
-      icon: document.getElementById('cf-icon').value,
     };
     try {
       await AdminAPI.upsertCategory(row);

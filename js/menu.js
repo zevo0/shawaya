@@ -149,11 +149,6 @@ window.SHAWAYA_SAMPLE_DATA = {
       option_groups: [],
     },
   ],
-
-  offers: [
-    { id: 'of1', title_ar: 'بوكس شواية العائلي', description_ar: 'يكفي ٤ أشخاص، تشكيلة مشاوي كاملة', price: 14.900, image_url: 'assets/images/dish-wrap-box.webp' },
-    { id: 'of2', title_ar: 'صندوق الشاورما المزدوج', description_ar: 'شاورما لحم + كريسبي رول بطاطا وصوصات', price: 5.200, image_url: 'assets/images/dish-crispy-wrap.webp' },
-  ],
 };
 
 const BADGE_META = {
@@ -166,7 +161,7 @@ const BADGE_META = {
 };
 
 const Menu = (() => {
-  let data = { categories: [], products: [], offers: [] };
+  let data = { categories: [], products: [] };
   const favorites = new Set(JSON.parse(sessionStorage.getItem('shawaya_favs') || '[]'));
 
   function currency(n) {
@@ -224,7 +219,6 @@ const Menu = (() => {
       <div class="container">
         <button class="category-title" aria-expanded="true" data-toggle-category="${cat.id}">
           <span class="category-title-left">
-            <span class="cat-icon">${icon(cat.icon)}</span>
             <h2>${cat.name_ar} <span class="cat-count">(${products.length})</span></h2>
           </span>
           <span class="chev">${icon('chevronDown')}</span>
@@ -251,7 +245,6 @@ const Menu = (() => {
     wrap.innerHTML = byCategory.map(({ cat, products }) => categorySectionTemplate(cat, products)).join('');
 
     renderCategoryNav(data.categories);
-    renderOffers(data.offers);
     bindAccordion();
     bindFavorites();
     bindQuickAdd();
@@ -263,25 +256,11 @@ const Menu = (() => {
     const nav = document.getElementById('category-scroller');
     nav.innerHTML = categories.map((c, i) => `
       <a href="#cat-${c.id}" class="category-chip" data-cat-link="${c.id}" aria-current="${i === 0}">
-        ${icon(c.icon)}<span>${c.name_ar}</span>
+        <span>${c.name_ar}</span>
       </a>`).join('');
 
     document.getElementById('nav-categories-inline').innerHTML = categories.map(c =>
       `<a href="#cat-${c.id}">${c.name_ar}</a>`).join('');
-  }
-
-  function renderOffers(offers) {
-    const el = document.getElementById('offers-scroller');
-    if (!offers?.length) { document.getElementById('offers-strip')?.remove(); return; }
-    el.innerHTML = offers.map(o => `
-      <article class="offer-card">
-        <img src="${o.image_url}" alt="${escapeHtml(o.title_ar)}" loading="lazy">
-        <div class="offer-card-body">
-          <h3>${escapeHtml(o.title_ar)}</h3>
-          <p>${escapeHtml(o.description_ar)}</p>
-          <span class="item-price">${currency(o.price)}</span>
-        </div>
-      </article>`).join('');
   }
 
   function bindAccordion() {

@@ -87,22 +87,6 @@ create table if not exists public.product_options (
 create index if not exists product_options_group_idx on public.product_options(group_id);
 
 -- ---------------------------------------------------------------------
--- OFFERS
--- ---------------------------------------------------------------------
-create table if not exists public.offers (
-  id uuid primary key default gen_random_uuid(),
-  title_ar text not null,
-  description_ar text default '',
-  price numeric(10,3) not null default 0,
-  image_url text,
-  is_active boolean not null default true,
-  starts_at date,
-  ends_at date,
-  sort_order int not null default 0,
-  created_at timestamptz not null default now()
-);
-
--- ---------------------------------------------------------------------
 -- ORDERS (written by the public site at checkout, managed by admin)
 -- ---------------------------------------------------------------------
 create table if not exists public.orders (
@@ -147,7 +131,6 @@ alter table public.categories enable row level security;
 alter table public.products enable row level security;
 alter table public.option_groups enable row level security;
 alter table public.product_options enable row level security;
-alter table public.offers enable row level security;
 alter table public.orders enable row level security;
 alter table public.order_items enable row level security;
 alter table public.media enable row level security;
@@ -187,13 +170,6 @@ drop policy if exists "product_options_write_admin" on public.product_options;
 create policy "product_options_write_admin" on public.product_options for all
   using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
--- offers
-drop policy if exists "offers_select_all" on public.offers;
-create policy "offers_select_all" on public.offers for select using (true);
-drop policy if exists "offers_write_admin" on public.offers;
-create policy "offers_write_admin" on public.offers for all
-  using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
-
 -- orders: anon (customers) may INSERT only; admin (authenticated) can do everything
 drop policy if exists "orders_insert_anon" on public.orders;
 create policy "orders_insert_anon" on public.orders for insert with check (true);
@@ -221,7 +197,6 @@ create policy "media_write_admin" on public.media for all
 alter publication supabase_realtime add table public.settings;
 alter publication supabase_realtime add table public.categories;
 alter publication supabase_realtime add table public.products;
-alter publication supabase_realtime add table public.offers;
 alter publication supabase_realtime add table public.option_groups;
 alter publication supabase_realtime add table public.product_options;
 
@@ -249,7 +224,7 @@ create policy "media_bucket_admin_delete" on storage.objects for delete
   using (bucket_id = 'media' and auth.role() = 'authenticated');
 
 -- =========================================================================
--- SEED DATA — categories, products, options, offers (mirrors the sample
+-- SEED DATA — categories, products, options (mirrors the sample
 -- data the front-end ships with, so the switch to Supabase is seamless)
 -- =========================================================================
 do $$
@@ -286,8 +261,5 @@ begin
 
     insert into public.products (category_id,name_ar,description_ar,price,badges,sort_order)
       values (c_drinks,'عصير ليمون نعناع','عصير ليمون طازج مع النعناع.',1.200,'{}',1);
-
-    insert into public.offers (title_ar,description_ar,price,is_active,sort_order)
-      values ('بوكس شواية العائلي','يكفي ٤ أشخاص، تشكيلة مشاوي كاملة',14.900,true,1);
   end if;
 end $$;

@@ -187,8 +187,11 @@
 
   let unsubscribe = null;
   function initRealtimeSync() {
-    unsubscribe = ShawayaData.subscribeToChanges(async () => {
-      await loadSettings();
+    unsubscribe = ShawayaData.subscribeToChanges(async ({ table }) => {
+      if (table === 'settings') {
+        await loadSettings();
+        return; // no need to touch the menu grid for a settings-only change
+      }
       await loadMenu();
       Toast?.show?.('تم تحديث المنيو');
     });

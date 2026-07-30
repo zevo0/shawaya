@@ -1,6 +1,6 @@
 /**
  * admin-media.js — Media Library page + the reusable "picker" modal that
- * every image field (products/categories/offers/settings/SEO) opens.
+ * every image field (products/categories/settings/SEO) opens.
  */
 const AdminMedia = (() => {
   let cache = [];

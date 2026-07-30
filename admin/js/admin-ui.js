@@ -53,21 +53,6 @@ const AdminUI = (() => {
     return [...container.querySelectorAll('.badge-pick.is-selected')].map(el => el.dataset.badge);
   }
 
-  const ICON_OPTIONS = ['flame', 'drumstick', 'salad', 'cup', 'star', 'gift', 'chefHat', 'sparkle', 'hot'];
-
-  function renderIconPicker(container, hiddenInput, selected = 'flame') {
-    container.innerHTML = ICON_OPTIONS.map(key => `
-      <span class="icon-pick ${key === selected ? 'is-selected' : ''}" data-icon="${key}">${icon(key)}</span>
-    `).join('');
-    container.querySelectorAll('.icon-pick').forEach(el => {
-      el.addEventListener('click', () => {
-        container.querySelectorAll('.icon-pick').forEach(x => x.classList.remove('is-selected'));
-        el.classList.add('is-selected');
-        hiddenInput.value = el.dataset.icon;
-      });
-    });
-  }
-
   /* ---- Image picker: click a button -> open media library -> fills a
      hidden input + preview <img> with the chosen URL. ------------------- */
   let pendingImageTarget = null;
@@ -95,7 +80,6 @@ const AdminUI = (() => {
   return {
     toast, escapeHtml, currency, openModal, closeModal, bindModalClosers,
     BADGE_OPTIONS, renderBadgePicker, getSelectedBadges,
-    ICON_OPTIONS, renderIconPicker,
     bindImagePickers, resolveImagePick, confirmDelete,
   };
 })();

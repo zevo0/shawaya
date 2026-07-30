@@ -1,5 +1,5 @@
 /**
- * admin-router.js — Hash-based navigation between the 9 dashboard
+ * admin-router.js — Hash-based navigation between the 8 dashboard
  * sections. Each route lazily refreshes its module's data on entry so
  * the admin always sees current data without a full page reload.
  */
@@ -10,7 +10,6 @@ const AdminRouter = (() => {
     categories: () => AdminCategories.refresh(),
     options: async () => { await AdminCategories.refresh(); await AdminProducts.refresh(); AdminOptions.populateProductSelect(); },
     orders: () => AdminOrders.refresh(),
-    offers: () => AdminOffers.refresh(),
     settings: () => AdminSettings.refresh(),
     media: () => AdminMedia.refresh(),
     seo: () => AdminSEO.refresh(),
