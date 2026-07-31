@@ -78,20 +78,30 @@ const AdminUI = (() => {
     return window.confirm(message);
   }
 
-  /* ---- Mobile sidebar drawer: hamburger opens it, backdrop/close/Escape
+  /* ---- Mobile sidebar drawer: hamburger toggles it, backdrop/close/Escape
      close it, and AdminRouter closes it automatically on every navigation. */
+  function isMobileNavOpen() {
+    return document.getElementById('admin-sidebar').classList.contains('is-open');
+  }
   function openMobileNav() {
     document.getElementById('admin-sidebar').classList.add('is-open');
     document.getElementById('admin-sidebar-backdrop').classList.add('is-open');
     document.getElementById('admin-hamburger-btn').setAttribute('aria-expanded', 'true');
+    document.body.classList.add('admin-nav-open');
+    document.querySelector('.admin-sidebar .admin-nav-link')?.focus();
   }
   function closeMobileNav() {
+    if (!isMobileNavOpen()) return;
     document.getElementById('admin-sidebar').classList.remove('is-open');
     document.getElementById('admin-sidebar-backdrop').classList.remove('is-open');
     document.getElementById('admin-hamburger-btn')?.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('admin-nav-open');
+  }
+  function toggleMobileNav() {
+    if (isMobileNavOpen()) closeMobileNav(); else openMobileNav();
   }
   function bindMobileNav() {
-    document.getElementById('admin-hamburger-btn').addEventListener('click', openMobileNav);
+    document.getElementById('admin-hamburger-btn').addEventListener('click', toggleMobileNav);
     document.getElementById('admin-sidebar-close-btn').addEventListener('click', closeMobileNav);
     document.getElementById('admin-sidebar-backdrop').addEventListener('click', closeMobileNav);
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMobileNav(); });
@@ -101,7 +111,7 @@ const AdminUI = (() => {
     toast, escapeHtml, currency, openModal, closeModal, bindModalClosers,
     BADGE_OPTIONS, renderBadgePicker, getSelectedBadges,
     bindImagePickers, resolveImagePick, confirmDelete,
-    bindMobileNav, openMobileNav, closeMobileNav,
+    bindMobileNav, openMobileNav, closeMobileNav, toggleMobileNav,
   };
 })();
 

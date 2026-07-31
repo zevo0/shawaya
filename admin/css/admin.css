@@ -246,20 +246,37 @@ body.admin-body {
   gap: 12px;
   position: sticky;
   top: 0;
-  z-index: 120;
+  /* Always above the backdrop AND the drawer, so the toggle button is
+     reachable no matter what state the menu is in. */
+  z-index: 220;
   background: var(--color-dark);
   color: #fff;
-  padding: 14px 16px;
+  padding: 10px 12px;
 }
 .admin-hamburger-btn {
   display: flex; align-items: center; justify-content: center;
-  width: 40px; height: 40px;
+  width: 48px; height: 48px;
   border-radius: var(--radius-sm);
   color: #fff;
   flex-shrink: 0;
 }
 .admin-hamburger-btn:hover { background: rgba(255,255,255,.08); }
-.admin-hamburger-btn svg { width: 22px; height: 22px; }
+
+/* 3-line icon that morphs into an X when the drawer is open — gives clear
+   open/close feedback instead of a static icon that looks unresponsive. */
+.admin-hamburger-lines { position: relative; width: 20px; height: 15px; display: inline-block; }
+.admin-hamburger-lines span {
+  position: absolute; right: 0; width: 100%; height: 2px; border-radius: 2px;
+  background: currentColor;
+  transition: transform .22s ease, opacity .22s ease, top .22s ease;
+}
+.admin-hamburger-lines span:nth-child(1) { top: 0; }
+.admin-hamburger-lines span:nth-child(2) { top: 6.5px; }
+.admin-hamburger-lines span:nth-child(3) { top: 13px; }
+.admin-hamburger-btn[aria-expanded="true"] .admin-hamburger-lines span:nth-child(1) { top: 6.5px; transform: rotate(45deg); }
+.admin-hamburger-btn[aria-expanded="true"] .admin-hamburger-lines span:nth-child(2) { opacity: 0; }
+.admin-hamburger-btn[aria-expanded="true"] .admin-hamburger-lines span:nth-child(3) { top: 6.5px; transform: rotate(-45deg); }
+
 .admin-mobile-logo { height: 28px; }
 .admin-mobile-title { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-md); }
 
@@ -273,9 +290,12 @@ body.admin-body {
   z-index: 190;
   opacity: 0;
   pointer-events: none;
-  transition: opacity .25s ease;
+  transition: opacity .22s ease;
 }
 .admin-sidebar-backdrop.is-open { opacity: 1; pointer-events: auto; }
+
+/* Locks background scroll while the drawer is open (applied to <body>) */
+body.admin-nav-open { overflow: hidden; }
 
 /* ---- Responsive --------------------------------------------------------*/
 @media (max-width: 900px) {
@@ -288,26 +308,28 @@ body.admin-body {
     inset-block: 0;
     right: 0;
     height: 100svh;
-    width: min(280px, 82vw);
+    width: min(300px, 84vw);
     flex-direction: column;
     overflow-x: hidden;
     transform: translateX(100%);
-    transition: transform .3s ease;
+    transition: transform .22s ease;
     z-index: 200;
     box-shadow: -10px 0 30px rgba(0,0,0,.3);
+    padding-top: 20px;
   }
   .admin-sidebar.is-open { transform: translateX(0); }
   .admin-sidebar .brand { display: flex; flex: 1; }
   .admin-sidebar .spacer { display: block; }
-  .admin-sidebar { padding-top: 20px; }
   .admin-sidebar-close-btn {
     display: flex; align-items: center; justify-content: center;
-    position: absolute; top: 18px; left: 16px;
-    width: 36px; height: 36px; color: rgba(255,255,255,.7); border-radius: var(--radius-sm);
+    position: absolute; top: 12px; left: 10px;
+    width: 44px; height: 44px; color: rgba(255,255,255,.7); border-radius: var(--radius-sm);
   }
   .admin-sidebar-close-btn:hover { background: rgba(255,255,255,.08); color: #fff; }
   .admin-sidebar-close-btn svg { width: 18px; height: 18px; }
+  .admin-nav-link { min-height: 48px; }
   .admin-nav-link span { display: inline; }
+  .admin-logout-btn { min-height: 48px; }
   .admin-logout-btn span { display: inline; }
 
   .admin-main { padding: 18px; }
