@@ -21,6 +21,7 @@ const AdminRouter = (() => {
   }
 
   async function render() {
+    AdminUI.closeMobileNav();
     const route = currentRoute();
     document.querySelectorAll('.admin-page').forEach(p => p.classList.add('hidden'));
     document.getElementById(`page-${route}`)?.classList.remove('hidden');

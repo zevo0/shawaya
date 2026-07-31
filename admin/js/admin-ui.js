@@ -32,18 +32,19 @@ const AdminUI = (() => {
   }
 
   const BADGE_OPTIONS = [
-    { key: 'popular', label: 'الأكثر طلباً', icon: 'star' },
-    { key: 'hot', label: 'حار', icon: 'hot' },
-    { key: 'new', label: 'جديد', icon: 'sparkle' },
-    { key: 'limited', label: 'كمية محدودة', icon: 'clock' },
-    { key: 'offer', label: 'عرض', icon: 'gift' },
-    { key: 'chef', label: 'اختيار الشيف', icon: 'chefHat' },
+    { key: 'popular', label: 'الأكثر طلباً', img: 'best-seller.svg' },
+    { key: 'hot', label: 'حار', img: 'spicy.svg' },
+    { key: 'new', label: 'جديد', img: 'new.svg' },
+    { key: 'limited', label: 'كمية محدودة', img: 'limited.svg' },
+    { key: 'offer', label: 'عرض', img: 'offers.svg' },
+    { key: 'chef', label: 'اختيار الشيف', img: 'chef-choice.svg' },
   ];
 
   function renderBadgePicker(container, selected = []) {
     container.innerHTML = BADGE_OPTIONS.map(b => `
       <label class="badge-pick ${selected.includes(b.key) ? 'is-selected' : ''}" data-badge="${b.key}">
-        ${icon(b.icon)}<span>${b.label}</span>
+        <img src="../assets/icons/${b.img}" alt="" width="15" height="15">
+        <span>${b.label}</span>
       </label>`).join('');
     container.querySelectorAll('.badge-pick').forEach(el => {
       el.addEventListener('click', () => el.classList.toggle('is-selected'));
@@ -77,14 +78,35 @@ const AdminUI = (() => {
     return window.confirm(message);
   }
 
+  /* ---- Mobile sidebar drawer: hamburger opens it, backdrop/close/Escape
+     close it, and AdminRouter closes it automatically on every navigation. */
+  function openMobileNav() {
+    document.getElementById('admin-sidebar').classList.add('is-open');
+    document.getElementById('admin-sidebar-backdrop').classList.add('is-open');
+    document.getElementById('admin-hamburger-btn').setAttribute('aria-expanded', 'true');
+  }
+  function closeMobileNav() {
+    document.getElementById('admin-sidebar').classList.remove('is-open');
+    document.getElementById('admin-sidebar-backdrop').classList.remove('is-open');
+    document.getElementById('admin-hamburger-btn')?.setAttribute('aria-expanded', 'false');
+  }
+  function bindMobileNav() {
+    document.getElementById('admin-hamburger-btn').addEventListener('click', openMobileNav);
+    document.getElementById('admin-sidebar-close-btn').addEventListener('click', closeMobileNav);
+    document.getElementById('admin-sidebar-backdrop').addEventListener('click', closeMobileNav);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMobileNav(); });
+  }
+
   return {
     toast, escapeHtml, currency, openModal, closeModal, bindModalClosers,
     BADGE_OPTIONS, renderBadgePicker, getSelectedBadges,
     bindImagePickers, resolveImagePick, confirmDelete,
+    bindMobileNav, openMobileNav, closeMobileNav,
   };
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
   AdminUI.bindModalClosers();
   AdminUI.bindImagePickers();
+  AdminUI.bindMobileNav();
 });
