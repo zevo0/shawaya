@@ -300,6 +300,7 @@ body.admin-nav-open { overflow: hidden; }
 /* ---- Responsive --------------------------------------------------------*/
 @media (max-width: 900px) {
   .admin-mobile-topbar { display: flex; }
+  .admin-sidebar-backdrop { display: block; }
 
   .admin-shell { grid-template-columns: 1fr; }
 
