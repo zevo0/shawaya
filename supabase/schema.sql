@@ -229,29 +229,31 @@ create policy "media_bucket_admin_delete" on storage.objects for delete
 -- =========================================================================
 do $$
 declare
-  c_popular uuid; c_grill uuid; c_offers uuid; c_starters uuid; c_drinks uuid;
+  c_grill uuid; c_offers uuid; c_starters uuid; c_drinks uuid;
   p_id uuid; g_id uuid;
 begin
   if (select count(*) from public.categories) = 0 then
-    insert into public.categories (name_ar, icon, sort_order) values ('الأكثر طلباً','star',1) returning id into c_popular;
-    insert into public.categories (name_ar, icon, sort_order) values ('مشويات الفحم','flame',2) returning id into c_grill;
-    insert into public.categories (name_ar, icon, sort_order) values ('العروض والبوكسات','gift',3) returning id into c_offers;
-    insert into public.categories (name_ar, icon, sort_order) values ('المقبلات والسلطات','salad',4) returning id into c_starters;
-    insert into public.categories (name_ar, icon, sort_order) values ('المشروبات والصوصات','cup',5) returning id into c_drinks;
+    insert into public.categories (name_ar, icon, sort_order) values ('مشويات الفحم','flame',1) returning id into c_grill;
+    insert into public.categories (name_ar, icon, sort_order) values ('العروض والبوكسات','gift',2) returning id into c_offers;
+    insert into public.categories (name_ar, icon, sort_order) values ('المقبلات والسلطات','salad',3) returning id into c_starters;
+    insert into public.categories (name_ar, icon, sort_order) values ('المشروبات والصوصات','cup',4) returning id into c_drinks;
 
+    -- "الأكثر طلباً" is no longer a real category — any product tagged with
+    -- the 'popular' badge surfaces in that section on the site automatically,
+    -- while still living under its real category here (e.g. مشويات الفحم).
     insert into public.products (category_id,name_ar,description_ar,price,badges,sort_order)
-      values (c_popular,'مشكل شواية مشاوي','تشكيلة فاخرة من الكباب واللحم والدجاج المشوي على الفحم، تقدم مع الأرز والخبز الطازج.',6.900,array['popular','chef'],1)
+      values (c_grill,'مشكل شواية مشاوي','تشكيلة فاخرة من الكباب واللحم والدجاج المشوي على الفحم، تقدم مع الأرز والخبز الطازج.',6.900,array['popular','chef'],1)
       returning id into p_id;
     insert into public.option_groups (product_id,title_ar,type,required,sort_order) values (p_id,'درجة التتبيل','single',true,1) returning id into g_id;
     insert into public.product_options (group_id,label_ar,price_delta,sort_order) values (g_id,'عادي',0,1),(g_id,'حار',0,2);
 
     insert into public.products (category_id,name_ar,description_ar,price,badges,sort_order)
-      values (c_popular,'شاورما لحم ملفوف مقرمش','لفائف شاورما اللحم المقرمشة، محشوة بالصوص الخاص والمخللات.',3.200,array['popular'],2);
+      values (c_grill,'شاورما لحم ملفوف مقرمش','لفائف شاورما اللحم المقرمشة، محشوة بالصوص الخاص والمخللات.',3.200,array['popular'],2);
 
     insert into public.products (category_id,name_ar,description_ar,price,badges,sort_order)
-      values (c_grill,'كباب لحم فحم','كباب لحم غنم طازج متبل بالبهارات البيتية، مشوي على الفحم.',4.500,array['popular'],1);
+      values (c_grill,'كباب لحم فحم','كباب لحم غنم طازج متبل بالبهارات البيتية، مشوي على الفحم.',4.500,array['popular'],3);
     insert into public.products (category_id,name_ar,description_ar,price,badges,sort_order)
-      values (c_grill,'دجاج نص فحم كامل','نصف دجاجة مشوية بالفحم متبلة بالليمون والثوم.',3.500,'{}',2);
+      values (c_grill,'دجاج نص فحم كامل','نصف دجاجة مشوية بالفحم متبلة بالليمون والثوم.',3.500,'{}',4);
 
     insert into public.products (category_id,name_ar,description_ar,price,badges,sort_order)
       values (c_offers,'بوكس شواية العائلي','وجبة عائلية تكفي ٤ أشخاص: تشكيلة مشاوي، أرز، سلطة، وخبز طازج.',14.900,array['offer','limited'],1);

@@ -34,7 +34,7 @@ const Modal = (() => {
     modalEl.querySelector('.modal-media img').alt = p.name_ar;
     modalEl.querySelector('#modal-title').textContent = p.name_ar;
     modalEl.querySelector('#modal-desc').textContent = p.description_ar;
-    modalEl.querySelector('#modal-base-price').textContent = Menu.currency(p.price);
+    modalEl.querySelector('#modal-base-price').innerHTML = Menu.priceHtml(p.price);
     modalEl.querySelector('#modal-badges').innerHTML = Menu.badgeMarkup(p.badges);
 
     const groupsWrap = modalEl.querySelector('#modal-option-groups');
@@ -50,7 +50,7 @@ const Modal = (() => {
               <input type="${g.type === 'single' ? 'radio' : 'checkbox'}" name="group-${g.id}" value="${o.id}" ${g.type === 'single' && g.required && g === p.option_groups.find(gr=>gr.required) && o === g.options[0] ? '' : ''}>
               ${o.label_ar}
             </span>
-            <span class="option-row-price">${o.price_delta > 0 ? '+' + Menu.currency(o.price_delta) : ''}</span>
+            <span class="option-row-price">${o.price_delta > 0 ? '+' + Menu.priceHtml(o.price_delta) : ''}</span>
           </label>`).join('')}
       </div>`).join('');
 
@@ -94,7 +94,7 @@ const Modal = (() => {
 
   function updateTotal() {
     const total = unitPrice(currentProduct) * qty;
-    modalEl.querySelector('#modal-total-price').textContent = Menu.currency(total);
+    modalEl.querySelector('#modal-total-price').innerHTML = Menu.priceHtml(total);
   }
 
   function open(product) {

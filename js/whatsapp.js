@@ -18,8 +18,8 @@ const WhatsAppCheckout = (() => {
       if (line.notes) msg += `   الملاحظات: ${line.notes}\n`;
       msg += `   السعر: ${Menu.currency(unit * line.qty)}\n`;
     });
-    msg += `\n📝ملاحظات عامة:\n${generalNotes?.trim() || 'لا يوجد'}\n`;
-    msg += `\n💰 إجمالي المبلغ:\n${Menu.currency(totals.total)}\n`;
+    msg += `\n📝 ملاحظات عامة\n${generalNotes?.trim() || 'لا يوجد'}\n`;
+    msg += `\n💰 الإجمالي المتوقع عند الاستلام\n${Menu.currency(totals.total)}\n`;
     msg += `\n⏱️ يرجى إفادتي بالوقت المتوقع لجاهزية الطلب.`;
     return msg;
   }

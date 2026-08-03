@@ -56,7 +56,9 @@
   .quick-add-btn { padding: 12px; }
 
   .whatsapp-fab { bottom: 18px; inset-inline-start: 18px; width: 52px; height: 52px; }
+  .whatsapp-fab.is-shifted { bottom: 84px; }
   .whatsapp-fab svg { width: 26px; height: 26px; }
+  .sticky-cart-bar { bottom: max(14px, env(safe-area-inset-bottom)); left: 12px; right: 12px; padding: 13px 16px; }
 }
 
 /* ---- Very small phones (320–375px) --------------------------------------*/
@@ -77,5 +79,5 @@
 
 /* ---- Print --------------------------------------------------------------*/
 @media print {
-  .site-header, .cart-drawer, .whatsapp-fab, .modal-overlay, .item-modal, .scroll-indicator { display: none !important; }
+  .site-header, .cart-drawer, .whatsapp-fab, .sticky-cart-bar, .modal-overlay, .item-modal, .scroll-indicator { display: none !important; }
 }

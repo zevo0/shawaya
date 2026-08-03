@@ -168,6 +168,13 @@ const Menu = (() => {
     return `${n.toFixed(3)} ر.ع`;
   }
 
+  /* Visual price markup — swaps the "ر.ع" text for the OMR glyph. Used
+     anywhere the price renders as HTML (cards, modal, cart); currency()
+     stays plain text for WhatsApp messages, admin numbers, and aria-labels. */
+  function priceHtml(n) {
+    return `<span class="price-value">${n.toFixed(3)}</span><img class="omr-icon" src="assets/icons/omr.svg" alt="ر.ع" width="14" height="14">`;
+  }
+
   function badgeMarkup(keys = []) {
     return keys.map(k => {
       const m = BADGE_META[k];
@@ -203,7 +210,7 @@ const Menu = (() => {
       <div class="item-card-body">
         <h3>${escapeHtml(product.name_ar)}</h3>
         <div class="item-card-footer">
-          <span class="item-price">${currency(product.price)}</span>
+          <span class="item-price">${priceHtml(product.price)}</span>
           <button class="quick-add-btn" data-quickadd="${product.id}" aria-label="إضافة سريعة لـ ${escapeHtml(product.name_ar)}">
             ${icon('plus')}<span>أضف</span>
           </button>
@@ -237,14 +244,20 @@ const Menu = (() => {
   function render(menuData) {
     data = menuData;
     const wrap = document.getElementById('menu-sections');
+
+    const popularProducts = data.products.filter(p => (p.badges || []).includes('popular'));
+    const popularCat = { id: 'popular', name_ar: 'الأكثر طلباً' };
+
     const byCategory = data.categories.map(cat => ({
       cat,
       products: data.products.filter(p => p.category_id === cat.id),
     }));
 
-    wrap.innerHTML = byCategory.map(({ cat, products }) => categorySectionTemplate(cat, products)).join('');
+    wrap.innerHTML =
+      categorySectionTemplate(popularCat, popularProducts) +
+      byCategory.map(({ cat, products }) => categorySectionTemplate(cat, products)).join('');
 
-    renderCategoryNav(data.categories);
+    renderCategoryNav(data.categories, popularProducts.length > 0);
     bindAccordion();
     bindFavorites();
     bindQuickAdd();
@@ -252,15 +265,19 @@ const Menu = (() => {
     observeReveal();
   }
 
-  function renderCategoryNav(categories) {
+  function renderCategoryNav(categories, hasPopular) {
     const nav = document.getElementById('category-scroller');
-    nav.innerHTML = categories.map((c, i) => `
-      <a href="#cat-${c.id}" class="category-chip" data-cat-link="${c.id}" aria-current="${i === 0}">
+    const popularChip = hasPopular
+      ? `<a href="#cat-popular" class="category-chip" data-cat-link="popular" aria-current="true"><span>الأكثر طلباً</span></a>`
+      : '';
+    nav.innerHTML = popularChip + categories.map((c) => `
+      <a href="#cat-${c.id}" class="category-chip" data-cat-link="${c.id}" aria-current="${!hasPopular && c === categories[0]}">
         <span>${c.name_ar}</span>
       </a>`).join('');
 
-    document.getElementById('nav-categories-inline').innerHTML = categories.map(c =>
-      `<a href="#cat-${c.id}">${c.name_ar}</a>`).join('');
+    const inlineLinks = (hasPopular ? [`<a href="#cat-popular">الأكثر طلباً</a>`] : [])
+      .concat(categories.map(c => `<a href="#cat-${c.id}">${c.name_ar}</a>`));
+    document.getElementById('nav-categories-inline').innerHTML = inlineLinks.join('');
   }
 
   function bindAccordion() {
@@ -331,5 +348,5 @@ const Menu = (() => {
     return data.products.filter(p => !excludeIds.includes(p.id) && (p.category_id === 'drinks' || p.category_id === 'starters')).slice(0, count);
   }
 
-  return { render, currency, findProduct, getAll, badgeMarkup, escapeHtml, suggestUpsell };
+  return { render, currency, priceHtml, findProduct, getAll, badgeMarkup, escapeHtml, suggestUpsell };
 })();

@@ -69,6 +69,18 @@ const Cart = (() => {
     return lines.reduce((n, l) => n + l.qty, 0);
   }
 
+  function renderStickyBar(n) {
+    const bar = document.getElementById('sticky-cart-bar');
+    const fab = document.getElementById('whatsapp-fab');
+    if (!bar) return;
+    bar.hidden = n === 0;
+    fab?.classList.toggle('is-shifted', n > 0);
+    if (n > 0) {
+      document.getElementById('sticky-cart-bar-count').textContent = n;
+      document.getElementById('sticky-cart-bar-total').innerHTML = Menu.priceHtml(totals().total);
+    }
+  }
+
   function bumpFab() {
     const badge = document.getElementById('cart-count');
     badge.classList.remove('bump');
@@ -81,6 +93,8 @@ const Cart = (() => {
     const n = count();
     badge.textContent = n;
     badge.hidden = n === 0;
+
+    renderStickyBar(n);
 
     const body = document.getElementById('cart-body');
     const footer = document.getElementById('cart-footer');
@@ -140,7 +154,7 @@ const Cart = (() => {
           <button type="button" class="cart-line-remove" data-remove="${line.lineId}">إزالة</button>
         </div>
       </div>
-      <div class="cart-line-price">${Menu.currency(unit * qty)}</div>
+      <div class="cart-line-price">${Menu.priceHtml(unit * qty)}</div>
     </div>`;
   }
 
@@ -162,7 +176,7 @@ const Cart = (() => {
           <div class="upsell-card">
             <img src="${p.image_url || 'assets/images/hero.webp'}" alt="" loading="lazy">
             <span>${Menu.escapeHtml(p.name_ar)}</span>
-            <span class="price">${Menu.currency(p.price)}</span>
+            <span class="price">${Menu.priceHtml(p.price)}</span>
             <button type="button" data-upsell-add="${p.id}">أضف</button>
           </div>`).join('')}
       </div>`;
@@ -177,8 +191,8 @@ const Cart = (() => {
 
   function renderTotals() {
     const { subtotal, total } = totals();
-    document.getElementById('cart-subtotal').textContent = Menu.currency(subtotal);
-    document.getElementById('cart-total').textContent = Menu.currency(total);
+    document.getElementById('cart-subtotal').innerHTML = Menu.priceHtml(subtotal);
+    document.getElementById('cart-total').innerHTML = Menu.priceHtml(total);
   }
 
   function getState() { return { lines, generalNotes, totals: totals() }; }
@@ -194,6 +208,7 @@ const CartDrawer = (() => {
     overlay = document.getElementById('cart-overlay');
     drawer = document.getElementById('cart-drawer');
     document.getElementById('cart-fab').addEventListener('click', open);
+    document.getElementById('sticky-cart-bar')?.addEventListener('click', open);
     document.getElementById('cart-close').addEventListener('click', close);
     overlay.addEventListener('click', close);
     document.getElementById('clear-cart-btn').addEventListener('click', () => {
@@ -207,12 +222,14 @@ const CartDrawer = (() => {
     overlay.classList.add('is-open');
     drawer.classList.add('is-open');
     document.body.style.overflow = 'hidden';
+    document.getElementById('sticky-cart-bar')?.setAttribute('hidden', '');
     drawer.querySelector('#cart-close').focus();
   }
   function close() {
     overlay.classList.remove('is-open');
     drawer.classList.remove('is-open');
     document.body.style.overflow = '';
+    if (Cart.count() > 0) document.getElementById('sticky-cart-bar')?.removeAttribute('hidden');
     lastFocused?.focus();
   }
 
