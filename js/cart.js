@@ -2,6 +2,7 @@
  * cart.js — In-memory cart state, drawer rendering, upsell suggestions.
  */
 const Cart = (() => {
+  const MAX_ITEM_QTY = 20;
   let lines = []; // { lineId, product, qty, selections, notes }
   let generalNotes = '';
 
@@ -33,10 +34,45 @@ const Cart = (() => {
     return total;
   }
 
-  function addItem({ product, qty, selections, notes }) {
+  // عناصر السلة تتطابق فقط إذا كان المنتج والخيارات والملاحظة متساوية.
+  // اختلاف أي خيار أو ملاحظة يعني أن الوجبتين طلبان منفصلان.
+  function selectionSignature(selections = {}) {
+    return Object.entries(selections)
+      .map(([groupId, selected]) => [
+        String(groupId),
+        (Array.isArray(selected) ? selected : [selected]).map(String).sort(),
+      ])
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([groupId, optionIds]) => `${groupId}:${optionIds.join(',')}`)
+      .join('|');
+  }
+
+  function addItem({ product, qty, selections = {}, notes = '' }) {
+    const safeQty = Math.min(MAX_ITEM_QTY, Math.max(1, Number(qty) || 1));
+    const normalizedNotes = String(notes).trim();
+    const signature = selectionSignature(selections);
+    const existingLine = lines.find((line) =>
+      String(line.product.id) === String(product.id) &&
+      selectionSignature(line.selections) === signature &&
+      String(line.notes || '').trim() === normalizedNotes
+    );
+
+    if (existingLine) {
+      const nextQty = Math.min(MAX_ITEM_QTY, existingLine.qty + safeQty);
+      if (nextQty === existingLine.qty) {
+        Toast.show(`الحد الأقصى لهذا الصنف هو ${MAX_ITEM_QTY}`);
+        return;
+      }
+      existingLine.qty = nextQty;
+      render();
+      bumpFab();
+      Toast.show(`تمت زيادة كمية ${product.name_ar}`);
+      return;
+    }
+
     lines.push({
       lineId: `${product.id}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      product, qty, selections, notes,
+      product, qty: safeQty, selections, notes: normalizedNotes,
     });
     render();
     bumpFab();
@@ -51,7 +87,12 @@ const Cart = (() => {
   function updateQty(lineId, delta) {
     const line = lines.find(l => l.lineId === lineId);
     if (!line) return;
-    line.qty = Math.max(1, line.qty + delta);
+    const nextQty = Math.min(MAX_ITEM_QTY, Math.max(1, line.qty + delta));
+    if (delta > 0 && nextQty === line.qty) {
+      Toast.show(`الحد الأقصى لهذا الصنف هو ${MAX_ITEM_QTY}`);
+      return;
+    }
+    line.qty = nextQty;
     render();
   }
 
@@ -77,7 +118,7 @@ const Cart = (() => {
     fab?.classList.toggle('is-shifted', n > 0);
     if (n > 0) {
       document.getElementById('sticky-cart-bar-count').textContent = n;
-      document.getElementById('sticky-cart-bar-total').innerHTML = Menu.priceHtml(totals().total);
+      document.getElementById('sticky-cart-bar-total').innerHTML = Menu.priceHtml(totals().total, true);
     }
   }
 
@@ -115,7 +156,6 @@ const Cart = (() => {
     }
 
     footer.style.display = 'flex';
-
     body.innerHTML = `
       <div class="cart-lines">
         ${lines.map(lineTemplate).join('')}
@@ -128,7 +168,6 @@ const Cart = (() => {
     `;
 
     body.querySelector('#cart-general-notes').addEventListener('input', (e) => { generalNotes = e.target.value; });
-
     bindLineEvents();
     renderUpsell();
     renderTotals();
@@ -149,7 +188,7 @@ const Cart = (() => {
           <div class="qty-stepper">
             <button type="button" data-qty-minus="${line.lineId}" aria-label="إنقاص الكمية">${icon('minus')}</button>
             <span>${qty}</span>
-            <button type="button" data-qty-plus="${line.lineId}" aria-label="زيادة الكمية">${icon('plus')}</button>
+            <button type="button" data-qty-plus="${line.lineId}" aria-label="زيادة الكمية" ${qty >= MAX_ITEM_QTY ? 'disabled aria-disabled="true"' : ''}>${icon('plus')}</button>
           </div>
           <button type="button" class="cart-line-remove" data-remove="${line.lineId}">إزالة</button>
         </div>
@@ -202,32 +241,92 @@ const Cart = (() => {
 
 /* ---- Cart drawer open/close controller ---------------------------------*/
 const CartDrawer = (() => {
-  let overlay, drawer, lastFocused;
+  let overlay, drawer, lastFocused, confirmOverlay, confirmDialog, confirmLastFocused;
+  const focusableSelector = 'button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  function trapFocus(event, container) {
+    const focusable = [...container.querySelectorAll(focusableSelector)].filter((element) => element.offsetParent !== null);
+    if (!focusable.length) { event.preventDefault(); return; }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  }
+
+  function createClearConfirm() {
+    confirmOverlay = document.createElement('div');
+    confirmOverlay.className = 'cart-confirm-overlay';
+    confirmOverlay.setAttribute('aria-hidden', 'true');
+    confirmOverlay.innerHTML = `
+      <section class="cart-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="cart-confirm-title" aria-describedby="cart-confirm-description">
+        <h2 id="cart-confirm-title">تفريغ السلة؟</h2>
+        <p id="cart-confirm-description">سيتم حذف جميع الأصناف والملاحظات من طلبك الحالي.</p>
+        <div class="cart-confirm-actions">
+          <button type="button" class="btn btn-outline btn-sm" data-cancel-clear>إلغاء</button>
+          <button type="button" class="btn btn-primary btn-sm" data-confirm-clear>نعم، أفرغ السلة</button>
+        </div>
+      </section>`;
+    document.body.appendChild(confirmOverlay);
+    confirmDialog = confirmOverlay.querySelector('.cart-confirm-dialog');
+    confirmOverlay.addEventListener('click', (event) => { if (event.target === confirmOverlay) closeClearConfirm(); });
+    confirmOverlay.querySelector('[data-cancel-clear]').addEventListener('click', closeClearConfirm);
+    confirmOverlay.querySelector('[data-confirm-clear]').addEventListener('click', () => {
+      Cart.clear();
+      closeClearConfirm();
+      Toast.show('تم تفريغ السلة');
+    });
+  }
+
+  function openClearConfirm() {
+    if (!Cart.count()) return;
+    confirmLastFocused = document.activeElement;
+    confirmOverlay.classList.add('is-open');
+    confirmOverlay.setAttribute('aria-hidden', 'false');
+    requestAnimationFrame(() => confirmOverlay.querySelector('[data-cancel-clear]')?.focus());
+  }
+
+  function closeClearConfirm() {
+    if (!confirmOverlay?.classList.contains('is-open')) return;
+    confirmOverlay.classList.remove('is-open');
+    confirmOverlay.setAttribute('aria-hidden', 'true');
+    confirmLastFocused?.focus();
+  }
 
   function init() {
     overlay = document.getElementById('cart-overlay');
     drawer = document.getElementById('cart-drawer');
+    createClearConfirm();
     document.getElementById('cart-fab').addEventListener('click', open);
     document.getElementById('sticky-cart-bar')?.addEventListener('click', open);
     document.getElementById('cart-close').addEventListener('click', close);
     overlay.addEventListener('click', close);
-    document.getElementById('clear-cart-btn').addEventListener('click', () => {
-      if (confirm('هل تريد تفريغ السلة بالكامل؟')) Cart.clear();
+    document.getElementById('clear-cart-btn').addEventListener('click', openClearConfirm);
+    document.addEventListener('keydown', (event) => {
+      if (confirmOverlay.classList.contains('is-open')) {
+        if (event.key === 'Escape') { closeClearConfirm(); return; }
+        if (event.key === 'Tab') trapFocus(event, confirmDialog);
+        return;
+      }
+      if (!drawer.classList.contains('is-open')) return;
+      if (event.key === 'Escape') { close(); return; }
+      if (event.key === 'Tab') trapFocus(event, drawer);
     });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && drawer.classList.contains('is-open')) close(); });
   }
 
   function open() {
     lastFocused = document.activeElement;
     overlay.classList.add('is-open');
     drawer.classList.add('is-open');
+    drawer.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
     document.getElementById('sticky-cart-bar')?.setAttribute('hidden', '');
     drawer.querySelector('#cart-close').focus();
   }
   function close() {
+    closeClearConfirm();
     overlay.classList.remove('is-open');
     drawer.classList.remove('is-open');
+    drawer.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
     if (Cart.count() > 0) document.getElementById('sticky-cart-bar')?.removeAttribute('hidden');
     lastFocused?.focus();
@@ -251,13 +350,15 @@ const CartDrawer = (() => {
 
 /* ---- Toast ---------------------------------------------------------- */
 const Toast = (() => {
-  let el, timer;
-  function show(msg) {
-    if (!el) el = document.getElementById('toast');
-    el.innerHTML = `${icon('check')}<span>${Menu.escapeHtml(msg)}</span>`;
+  let el;
+  function init() { el = document.getElementById('toast'); }
+  function show(message) {
+    if (!el) init();
+    el.textContent = message;
     el.classList.add('is-visible');
-    clearTimeout(timer);
-    timer = setTimeout(() => el.classList.remove('is-visible'), 2400);
+    clearTimeout(show.timer);
+    show.timer = setTimeout(() => el.classList.remove('is-visible'), 2800);
   }
+  document.addEventListener('DOMContentLoaded', init);
   return { show };
 })();

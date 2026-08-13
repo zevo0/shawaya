@@ -70,14 +70,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
       <span>التصنيفات</span>
     </a>
-    <a class="admin-nav-link" data-route="options" href="#options">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      <span>خيارات المنتجات</span>
-    </a>
-    <a class="admin-nav-link" data-route="orders" href="#orders">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h2l2.6 12.6a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L21 8H6"/></svg>
-      <span>الطلبات</span>
-    </a>
     <a class="admin-nav-link" data-route="settings" href="#settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.37a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.63 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1.96z"/></svg>
       <span>إعدادات الموقع</span>
@@ -85,10 +77,6 @@
     <a class="admin-nav-link" data-route="media" href="#media">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
       <span>مكتبة الوسائط</span>
-    </a>
-    <a class="admin-nav-link" data-route="seo" href="#seo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <span>SEO</span>
     </a>
 
     <div class="spacer"></div>
@@ -109,8 +97,8 @@
           <p class="sub">نظرة سريعة على أداء اليوم</p>
         </div>
         <div class="open-toggle">
-          <span class="label">حالة المطعم</span>
-          <button type="button" id="open-toggle-btn"><span class="dot"></span><span id="open-toggle-text">مفتوح</span></button>
+          <span class="label">السماح بالطلبات</span>
+          <button type="button" id="open-toggle-btn" aria-label="تبديل السماح بالطلبات"><span class="dot"></span><span id="open-toggle-text">مفعّل</span></button>
         </div>
       </div>
 
@@ -139,76 +127,58 @@
       </div>
 
       <div class="panel">
-        <div class="panel-header"><h2>آخر الطلبات</h2></div>
+        <div class="panel-header"><h2>آخر طلبات اليوم</h2></div>
         <div class="table-wrap"><table class="admin-table" id="recent-orders-table"><thead><tr>
-          <th>الوقت</th><th>الأصناف</th><th>الإجمالي</th><th>الحالة</th>
+          <th>الوقت</th><th>الأصناف</th><th>الإجمالي</th><th>الحالة</th><th>إجراء</th>
         </tr></thead><tbody></tbody></table></div>
-        <div class="empty-state hidden" id="recent-orders-empty">لا توجد طلبات بعد</div>
+        <div class="empty-state hidden" id="recent-orders-empty">لا توجد طلبات اليوم بعد</div>
       </div>
     </section>
 
     <!-- ===== PRODUCTS ===== -->
     <section class="admin-page hidden" id="page-products">
-      <div class="admin-topbar">
-        <div><h1>إدارة المنتجات</h1><p class="sub">إضافة وتعديل وإخفاء الأصناف</p></div>
-        <button type="button" class="btn btn-primary btn-sm" id="add-product-btn">+ إضافة منتج</button>
+      <!-- Step 1: pick a category -->
+      <div id="products-categories-view">
+        <div class="admin-topbar">
+          <div><h1>المنتجات</h1><p class="sub">اختر تصنيفاً لإدارة منتجاته</p></div>
+        </div>
+        <div class="category-picker-grid" id="products-category-grid"></div>
+        <div class="empty-state hidden" id="products-categories-empty">أضف تصنيفاً أولاً من صفحة "التصنيفات" قبل إضافة منتجات</div>
       </div>
-      <div class="panel">
-        <div class="table-wrap"><table class="admin-table" id="products-table"><thead><tr>
-          <th></th><th>الاسم</th><th>التصنيف</th><th>السعر</th><th>الشارات</th><th>الحالة</th><th></th>
-        </tr></thead><tbody></tbody></table></div>
-        <div class="empty-state hidden" id="products-empty">لا توجد منتجات بعد</div>
+
+      <!-- Step 2: manage one category's products -->
+      <div id="products-list-view" class="hidden">
+        <div class="admin-topbar">
+          <div>
+            <button type="button" class="back-link" id="products-back-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              كل التصنيفات
+            </button>
+            <h1 id="products-category-title">—</h1>
+            <p class="sub">إضافة وتعديل وإخفاء الأصناف — اسحب ⠿ لإعادة الترتيب</p>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" id="add-product-btn">+ إضافة منتج</button>
+        </div>
+        <div class="panel">
+          <div class="table-wrap"><table class="admin-table" id="products-table"><thead><tr>
+            <th></th><th></th><th>الاسم</th><th>السعر</th><th>الشارات</th><th>الحالة</th><th></th>
+          </tr></thead><tbody></tbody></table></div>
+          <div class="empty-state hidden" id="products-empty">لا توجد منتجات بهذا التصنيف بعد</div>
+        </div>
       </div>
     </section>
 
     <!-- ===== CATEGORIES ===== -->
     <section class="admin-page hidden" id="page-categories">
       <div class="admin-topbar">
-        <div><h1>إدارة التصنيفات</h1><p class="sub">أقسام المنيو وترتيب ظهورها</p></div>
+        <div><h1>إدارة التصنيفات</h1><p class="sub">أقسام المنيو وترتيب ظهورها — اسحب ⠿ لإعادة الترتيب</p></div>
         <button type="button" class="btn btn-primary btn-sm" id="add-category-btn">+ إضافة تصنيف</button>
       </div>
       <div class="panel">
         <div class="table-wrap"><table class="admin-table" id="categories-table"><thead><tr>
-          <th>الاسم</th><th>الترتيب</th><th>الحالة</th><th></th>
+          <th></th><th>الاسم</th><th>الحالة</th><th></th>
         </tr></thead><tbody></tbody></table></div>
         <div class="empty-state hidden" id="categories-empty">لا توجد تصنيفات بعد</div>
-      </div>
-    </section>
-
-    <!-- ===== OPTIONS (customization) ===== -->
-    <section class="admin-page hidden" id="page-options">
-      <div class="admin-topbar">
-        <div><h1>خيارات المنتجات (Customization)</h1><p class="sub">أضف مجموعات خيارات وإضافات لكل منتج</p></div>
-      </div>
-      <div class="panel">
-        <div class="field span-2" style="max-width:420px">
-          <label for="options-product-select">اختر منتجاً</label>
-          <select id="options-product-select"></select>
-        </div>
-      </div>
-      <div id="option-groups-wrap"></div>
-    </section>
-
-    <!-- ===== ORDERS ===== -->
-    <section class="admin-page hidden" id="page-orders">
-      <div class="admin-topbar">
-        <div><h1>إدارة الطلبات</h1><p class="sub">جميع الطلبات الواردة من الموقع</p></div>
-        <div class="gap-8">
-          <select id="orders-status-filter" class="field" style="border:1.5px solid var(--color-border);border-radius:var(--radius-pill);padding:8px 14px;font-size:var(--fs-sm)">
-            <option value="">كل الحالات</option>
-            <option value="new">جديد</option>
-            <option value="preparing">قيد التحضير</option>
-            <option value="ready">جاهز</option>
-            <option value="completed">مكتمل</option>
-            <option value="cancelled">ملغي</option>
-          </select>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="table-wrap"><table class="admin-table" id="orders-table"><thead><tr>
-          <th>الوقت</th><th>الأصناف</th><th>الإجمالي</th><th>الملاحظات</th><th>الحالة</th>
-        </tr></thead><tbody></tbody></table></div>
-        <div class="empty-state hidden" id="orders-empty">لا توجد طلبات</div>
       </div>
     </section>
 
@@ -237,12 +207,11 @@
           <div class="field"><label for="settings-whatsapp">رقم الواتساب (بدون +)</label><input id="settings-whatsapp" required placeholder="96890000000"></div>
           <div class="field span-2"><label for="settings-tagline">الشعار النصي (Tagline)</label><input id="settings-tagline"></div>
           <div class="field span-2"><label for="settings-description">وصف الموقع</label><textarea id="settings-description" rows="2"></textarea></div>
+          <div class="field span-2"><label for="settings-seo-keywords">الكلمات المفتاحية للبحث (مفصولة بفواصل)</label><input id="settings-seo-keywords" placeholder="مشاوي، شواية، طلبات مطاعم"></div>
           <div class="field"><label for="settings-map">رابط خرائط Google</label><input id="settings-map" type="url"></div>
           <div class="field"></div>
           <div class="field"><label for="settings-open-hour">ساعة الفتح (0-23)</label><input id="settings-open-hour" type="number" min="0" max="23" required></div>
           <div class="field"><label for="settings-close-hour">ساعة الإغلاق (1-24)</label><input id="settings-close-hour" type="number" min="1" max="24" required></div>
-          <div class="field"><label for="settings-prep-min">وقت التحضير الأدنى (دقيقة)</label><input id="settings-prep-min" type="number" min="1" required></div>
-          <div class="field"><label for="settings-prep-max">وقت التحضير الأقصى (دقيقة)</label><input id="settings-prep-max" type="number" min="1" required></div>
           <div class="field"><label for="settings-instagram">إنستغرام</label><input id="settings-instagram" type="url" placeholder="https://instagram.com/..."></div>
         </div>
         <div class="admin-modal-footer">
@@ -264,38 +233,6 @@
         <div class="media-grid" id="media-grid"></div>
         <div class="empty-state hidden" id="media-empty">لا توجد صور بعد</div>
       </div>
-    </section>
-
-    <!-- ===== SEO ===== -->
-    <section class="admin-page hidden" id="page-seo">
-      <div class="admin-topbar"><div><h1>إعدادات SEO</h1><p class="sub">كيف يظهر الموقع في نتائج البحث ومشاركات التواصل</p></div></div>
-      <form class="panel" id="seo-form">
-        <div class="form-grid">
-          <div class="field span-2"><label for="seo-title">Title</label><input id="seo-title" required></div>
-          <div class="field span-2"><label for="seo-description">Description</label><textarea id="seo-description" rows="3"></textarea></div>
-          <div class="field span-2"><label for="seo-keywords">Keywords (مفصولة بفواصل)</label><input id="seo-keywords"></div>
-          <div class="field span-2">
-            <label>Open Graph Image</label>
-            <div class="image-picker">
-              <img class="preview" id="seo-og-preview" src="../assets/images/hero.webp" alt="">
-              <button type="button" class="btn btn-outline btn-sm" data-pick-image="seo-og-url">اختر من الوسائط</button>
-            </div>
-            <input type="hidden" id="seo-og-url">
-          </div>
-          <div class="field span-2">
-            <label>Favicon</label>
-            <div class="image-picker">
-              <img class="preview" id="seo-favicon-preview" src="../assets/images/logo.webp" alt="">
-              <button type="button" class="btn btn-outline btn-sm" data-pick-image="seo-favicon-url">اختر من الوسائط</button>
-            </div>
-            <input type="hidden" id="seo-favicon-url">
-          </div>
-        </div>
-        <div class="admin-modal-footer">
-          <span class="field-error is-visible" id="seo-save-msg" style="color:#1a936f;display:none"></span>
-          <button type="submit" class="btn btn-primary">حفظ إعدادات SEO</button>
-        </div>
-      </form>
     </section>
 
   </main>
@@ -324,7 +261,6 @@
         <div class="field span-2"><label for="pf-desc">الوصف</label><textarea id="pf-desc" rows="2"></textarea></div>
         <div class="field"><label for="pf-price">السعر (ر.ع)</label><input id="pf-price" type="number" step="0.001" min="0" required></div>
         <div class="field"><label for="pf-category">التصنيف</label><select id="pf-category" required></select></div>
-        <div class="field"><label for="pf-sort">ترتيب الظهور</label><input id="pf-sort" type="number" value="0"></div>
         <div class="field" style="align-self:end">
           <label class="checkbox-row"><input type="checkbox" id="pf-available" checked> متاح للطلب</label>
         </div>
@@ -337,6 +273,25 @@
           <div class="badge-picker" id="pf-badges"></div>
         </div>
       </div>
+
+      <div class="product-subsection" id="pf-options-section">
+        <div class="product-subsection-header">
+          <h3>خيارات المنتج</h3>
+          <p class="sub">مجموعات اختيار (مثال: الحجم، درجة النضج) — اختيار واحد أو أكثر لكل مجموعة</p>
+        </div>
+        <div id="pf-option-groups-wrap"></div>
+        <p class="field-note hidden" id="pf-options-locked-note">احفظ المنتج أولاً حتى تقدر تضيف له خيارات</p>
+      </div>
+
+      <div class="product-subsection" id="pf-addons-section">
+        <div class="product-subsection-header">
+          <h3>الإضافات</h3>
+          <p class="sub">إضافات اختيارية بسعر إضافي (مثال: جبن إضافي، صوص)</p>
+        </div>
+        <div id="pf-addon-groups-wrap"></div>
+        <p class="field-note hidden" id="pf-addons-locked-note">احفظ المنتج أولاً حتى تقدر تضيف له إضافات</p>
+      </div>
+
       <div class="admin-modal-footer">
         <button type="button" class="btn btn-outline" data-close-modal="product-modal-overlay">إلغاء</button>
         <button type="submit" class="btn btn-primary">حفظ المنتج</button>
@@ -357,7 +312,6 @@
       <input type="hidden" id="cf-id">
       <div class="form-grid">
         <div class="field span-2"><label for="cf-name">اسم التصنيف</label><input id="cf-name" required></div>
-        <div class="field"><label for="cf-sort">الترتيب</label><input id="cf-sort" type="number" value="0"></div>
         <div class="field" style="align-self:end"><label class="checkbox-row"><input type="checkbox" id="cf-active" checked> نشط</label></div>
       </div>
       <div class="admin-modal-footer">
@@ -378,14 +332,8 @@
     </div>
     <div id="order-detail-body"></div>
     <div class="admin-modal-footer">
-      <select id="order-status-select" class="field" style="border:1.5px solid var(--color-border);border-radius:var(--radius-sm);padding:9px 12px">
-        <option value="new">جديد</option>
-        <option value="preparing">قيد التحضير</option>
-        <option value="ready">جاهز</option>
-        <option value="completed">مكتمل</option>
-        <option value="cancelled">ملغي</option>
-      </select>
-      <button type="button" class="btn btn-primary" id="order-status-save">تحديث الحالة</button>
+      <p class="text-muted" id="order-delivered-note" style="margin-inline-end:auto;font-size:var(--fs-sm)"></p>
+      <button type="button" class="btn btn-primary" id="order-mark-delivered">تم التسليم</button>
     </div>
   </div>
 </div>
@@ -417,9 +365,7 @@
 <script src="js/admin-categories.js" defer></script>
 <script src="js/admin-products.js" defer></script>
 <script src="js/admin-options.js" defer></script>
-<script src="js/admin-orders.js" defer></script>
 <script src="js/admin-settings.js" defer></script>
-<script src="js/admin-seo.js" defer></script>
 <script src="js/admin-router.js" defer></script>
 <script src="js/admin-auth.js" defer></script>
 </body>

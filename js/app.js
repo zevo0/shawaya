@@ -52,9 +52,18 @@
     window.SHAWAYA_SETTINGS = s;
     const $ = (id) => document.getElementById(id);
 
-    // Branding
-    if (s.logo_url) { $('brand-logo-img').src = s.logo_url; $('hero-logo-img').src = s.logo_url; $('footer-logo-img').src = s.logo_url; }
-    if (s.hero_url) $('hero-img').src = s.hero_url;
+    // Branding — بعض الشعارات اختيارية بحسب القالب، لذلك لا نسمح لعنصر
+    // غير موجود بإيقاف بقية تحديثات الإعدادات.
+    const setImage = (id, url) => {
+      const image = $(id);
+      if (image && url) image.src = url;
+    };
+    if (s.logo_url) {
+      setImage('brand-logo-img', s.logo_url);
+      setImage('hero-logo-img', s.logo_url);
+      setImage('footer-logo-img', s.logo_url);
+    }
+    setImage('hero-img', s.hero_url);
     $('brand-name-text').textContent = s.restaurant_name;
     $('hero-title').textContent = s.restaurant_name;
     $('hero-tagline').textContent = s.tagline;
@@ -92,12 +101,10 @@
 
   function renderHeroStatus(s) {
     const el = document.getElementById('hero-status');
-    const hour = new Date().getHours();
-    const withinHours = hour >= s.open_hour && hour < s.close_hour;
-    const isOpen = s.is_open && withinHours;
-    el.classList.toggle('is-closed', !isOpen);
-    el.innerHTML = `<span class="dot"></span><span>${isOpen ? 'مفتوح' : 'مغلق'}</span>`;
-    document.dispatchEvent(new CustomEvent('shawaya:open-state', { detail: { isOpen } }));
+    const state = RestaurantState.status(s);
+    el.classList.toggle('is-closed', !state.isOpen);
+    el.innerHTML = `<span class="dot"></span><span>${state.isOpen ? 'مفتوح' : 'مغلق'}</span>`;
+    document.dispatchEvent(new CustomEvent('shawaya:open-state', { detail: { isOpen: state.isOpen, reason: state.reason } }));
   }
 
   function initSmoothCategoryLinks() {
@@ -161,7 +168,8 @@
 
   function initHeroButtons() {
     document.getElementById('hero-order-btn')?.addEventListener('click', () => {
-      document.getElementById('menu-sections').scrollIntoView({ behavior: 'smooth' });
+      // الزر الرئيسي يبدأ مسار الطلب، بينما زر التصفح يبقى مخصصاً للاستكشاف.
+      CartDrawer.open();
     });
     document.getElementById('hero-browse-btn')?.addEventListener('click', () => {
       document.getElementById('menu-sections').scrollIntoView({ behavior: 'smooth' });

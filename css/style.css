@@ -228,7 +228,9 @@ h1, h2, h3, h4 {
 }
 #loading-screen.is-hidden { opacity: 0; visibility: hidden; }
 #loading-screen .loading-mark {
-  width: 120px; height: 120px;
+  width: 220px;
+  height: auto;
+  max-width: 70vw;
   animation: flame-pulse 1.6s ease-in-out infinite;
 }
 #loading-screen p {

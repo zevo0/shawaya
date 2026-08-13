@@ -1,19 +1,15 @@
 /**
- * admin-router.js — Hash-based navigation between the 8 dashboard
- * sections. Each route lazily refreshes its module's data on entry so
- * the admin always sees current data without a full page reload.
+ * admin-router.js — تنقل لوحة التحكم مع إيقاف اشتراك طلبات اليوم عند مغادرة الرئيسية.
  */
 const AdminRouter = (() => {
   const ROUTES = {
-    dashboard: () => AdminDashboard.refresh(),
-    products: async () => { await AdminCategories.refresh(); await AdminProducts.refresh(); },
+    dashboard: () => AdminDashboard.activate(),
+    products: () => AdminProducts.refresh(),
     categories: () => AdminCategories.refresh(),
-    options: async () => { await AdminCategories.refresh(); await AdminProducts.refresh(); AdminOptions.populateProductSelect(); },
-    orders: () => AdminOrders.refresh(),
     settings: () => AdminSettings.refresh(),
     media: () => AdminMedia.refresh(),
-    seo: () => AdminSEO.refresh(),
   };
+  let activeRoute = null;
 
   function currentRoute() {
     const hash = location.hash.replace('#', '');
@@ -23,10 +19,20 @@ const AdminRouter = (() => {
   async function render() {
     AdminUI.closeMobileNav();
     const route = currentRoute();
-    document.querySelectorAll('.admin-page').forEach(p => p.classList.add('hidden'));
+
+    // طلبات اليوم تستمع للتحديثات فقط أثناء ظهور الصفحة الرئيسية.
+    if (activeRoute === 'dashboard' && route !== 'dashboard') AdminDashboard.deactivate();
+
+    document.querySelectorAll('.admin-page').forEach((page) => page.classList.add('hidden'));
     document.getElementById(`page-${route}`)?.classList.remove('hidden');
-    document.querySelectorAll('.admin-nav-link').forEach(a => a.classList.toggle('is-active', a.dataset.route === route));
-    try { await ROUTES[route](); } catch (err) { AdminUI.toast(err.message || 'تعذر تحميل البيانات', true); }
+    document.querySelectorAll('.admin-nav-link').forEach((link) => link.classList.toggle('is-active', link.dataset.route === route));
+    activeRoute = route;
+
+    try {
+      await ROUTES[route]();
+    } catch (err) {
+      AdminUI.toast(err.message || 'تعذر تحميل البيانات', true);
+    }
   }
 
   function init() {

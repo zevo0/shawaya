@@ -163,6 +163,7 @@ const BADGE_META = {
 const Menu = (() => {
   let data = { categories: [], products: [] };
   const favorites = new Set(JSON.parse(sessionStorage.getItem('shawaya_favs') || '[]'));
+  const categoryUiState = new Map();
 
   function currency(n) {
     return `${n.toFixed(3)} ر.ع`;
@@ -171,8 +172,9 @@ const Menu = (() => {
   /* Visual price markup — swaps the "ر.ع" text for the OMR glyph. Used
      anywhere the price renders as HTML (cards, modal, cart); currency()
      stays plain text for WhatsApp messages, admin numbers, and aria-labels. */
-  function priceHtml(n) {
-    return `<span class="price-value">${n.toFixed(3)}</span><img class="omr-icon" src="assets/icons/omr.svg" alt="ر.ع" width="14" height="14">`;
+  function priceHtml(n, white = false) {
+    const icon = white ? 'omr-white.svg' : 'omr.svg';
+    return `<span class="price-value">${n.toFixed(3)}</span><img class="omr-icon" src="assets/icons/${icon}" alt="ر.ع" width="22" height="22">`;
   }
 
   function badgeMarkup(keys = []) {
@@ -183,9 +185,11 @@ const Menu = (() => {
     }).join('');
   }
 
-  function mediaMarkup(product) {
+  function mediaMarkup(product, priority = false) {
     if (product.image_url) {
-      return `<img src="${product.image_url}" alt="${escapeHtml(product.name_ar)}" loading="lazy" decoding="async" width="400" height="400">`;
+      const loading = priority ? 'eager' : 'lazy';
+      const fetchPriority = priority ? ' fetchpriority="high"' : '';
+      return `<img src="${product.image_url}" alt="${escapeHtml(product.name_ar)}" loading="${loading}"${fetchPriority} decoding="async" width="400" height="400">`;
     }
     // Elegant placeholder using the category flame motif — avoids stock imagery.
     return `<div class="placeholder-media" role="img" aria-label="${escapeHtml(product.name_ar)}" style="width:100%;height:100%;display:grid;place-items:center;background:linear-gradient(135deg,#f3e6d8,#f8f0e4);color:var(--color-primary);opacity:.55">${icon('flame', 'width="46" height="46"')}</div>`;
@@ -195,17 +199,17 @@ const Menu = (() => {
     return str.replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   }
 
-  function cardTemplate(product) {
+  function cardTemplate(product, isHiddenExtra = false, catId = '', priority = false) {
     const isFav = favorites.has(product.id);
     return `
-    <article class="item-card" data-id="${product.id}" data-category="${product.category_id}">
+    <article class="item-card" data-id="${product.id}" data-category="${product.category_id}" ${isHiddenExtra ? `hidden data-extra-of="${catId}"` : ''}>
       <div class="item-card-media">
         <div class="badge-row">${badgeMarkup(product.badges)}</div>
         <button class="fav-btn ${isFav ? 'is-active' : ''}" aria-pressed="${isFav}" aria-label="إضافة إلى المفضلة" data-fav="${product.id}">
           ${icon('heart')}
         </button>
         <button class="card-open-trigger" data-open="${product.id}" style="all:unset;position:absolute;inset:0;cursor:pointer" aria-label="عرض تفاصيل ${escapeHtml(product.name_ar)}"></button>
-        ${mediaMarkup(product)}
+        ${mediaMarkup(product, priority)}
       </div>
       <div class="item-card-body">
         <h3>${escapeHtml(product.name_ar)}</h3>
@@ -219,21 +223,32 @@ const Menu = (() => {
     </article>`;
   }
 
-  function categorySectionTemplate(cat, products) {
+  const CATEGORY_PAGE_SIZE = 5;
+
+  function categorySectionTemplate(cat, products, state = {}, priorityCount = 0) {
     if (!products.length) return '';
+    const visible = products.slice(0, CATEGORY_PAGE_SIZE);
+    const extra = products.slice(CATEGORY_PAGE_SIZE);
+    const hasMore = extra.length > 0;
+    const collapsed = Boolean(state.collapsed);
+    const showAll = Boolean(state.showAll);
     return `
     <section class="menu-section" id="cat-${cat.id}" data-category-section="${cat.id}">
       <div class="container">
-        <button class="category-title" aria-expanded="true" data-toggle-category="${cat.id}">
-          <span class="category-title-left">
-            <h2>${cat.name_ar} <span class="cat-count">(${products.length})</span></h2>
-          </span>
-          <span class="chev">${icon('chevronDown')}</span>
-        </button>
-        <div class="category-body" data-category-body="${cat.id}">
+        <div class="category-header-row">
+          <button class="category-title" aria-expanded="${!collapsed}" data-toggle-category="${cat.id}">
+            <span class="category-title-left">
+              <h2>${cat.name_ar} <span class="cat-count">(${products.length})</span></h2>
+            </span>
+            <span class="chev">${icon('chevronDown')}</span>
+          </button>
+          ${hasMore ? `<button type="button" class="show-all-btn ${showAll ? 'is-done' : ''}" data-show-all="${cat.id}">عرض الكل</button>` : ''}
+        </div>
+        <div class="category-body ${collapsed ? 'is-collapsed' : ''}" data-category-body="${cat.id}">
           <div class="grid-wrap">
             <div class="menu-grid reveal-group">
-              ${products.map(cardTemplate).join('')}
+              ${visible.map((p, index) => cardTemplate(p, false, cat.id, index < priorityCount)).join('')}
+              ${extra.map(p => cardTemplate(p, !showAll, cat.id)).join('')}
             </div>
           </div>
         </div>
@@ -241,7 +256,20 @@ const Menu = (() => {
     </section>`;
   }
 
+  function captureCategoryUiState() {
+    document.querySelectorAll('[data-category-section]').forEach((section) => {
+      const id = section.dataset.categorySection;
+      const body = section.querySelector('[data-category-body]');
+      const showAllButton = section.querySelector('[data-show-all]');
+      categoryUiState.set(id, {
+        collapsed: body?.classList.contains('is-collapsed') || false,
+        showAll: showAllButton?.classList.contains('is-done') || false,
+      });
+    });
+  }
+
   function render(menuData) {
+    captureCategoryUiState();
     data = menuData;
     const wrap = document.getElementById('menu-sections');
 
@@ -253,12 +281,19 @@ const Menu = (() => {
       products: data.products.filter(p => p.category_id === cat.id),
     }));
 
+    const firstCategoryPriority = popularProducts.length ? 0 : 4;
     wrap.innerHTML =
-      categorySectionTemplate(popularCat, popularProducts) +
-      byCategory.map(({ cat, products }) => categorySectionTemplate(cat, products)).join('');
+      categorySectionTemplate(popularCat, popularProducts, categoryUiState.get('popular'), 4) +
+      byCategory.map(({ cat, products }, index) => categorySectionTemplate(
+        cat,
+        products,
+        categoryUiState.get(cat.id),
+        index === 0 ? firstCategoryPriority : 0,
+      )).join('');
 
     renderCategoryNav(data.categories, popularProducts.length > 0);
     bindAccordion();
+    bindShowAll();
     bindFavorites();
     bindQuickAdd();
     bindCardOpen();
@@ -286,7 +321,19 @@ const Menu = (() => {
         const id = btn.dataset.toggleCategory;
         const body = document.querySelector(`[data-category-body="${id}"]`);
         const collapsed = body.classList.toggle('is-collapsed');
+        categoryUiState.set(id, { ...(categoryUiState.get(id) || {}), collapsed });
         btn.setAttribute('aria-expanded', String(!collapsed));
+      });
+    });
+  }
+
+  function bindShowAll() {
+    document.querySelectorAll('[data-show-all]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.showAll;
+        document.querySelectorAll(`[data-extra-of="${id}"]`).forEach(card => card.removeAttribute('hidden'));
+        categoryUiState.set(id, { ...(categoryUiState.get(id) || {}), showAll: true });
+        btn.classList.add('is-done');
       });
     });
   }

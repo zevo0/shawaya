@@ -70,7 +70,7 @@
 <!-- Loading screen -->
 <div id="loading-screen" aria-hidden="true">
   <div>
-    <img class="loading-mark" src="assets/images/logo.webp" alt="" width="96" height="96">
+    <img class="loading-mark" src="assets/images/logo.webp" alt="" width="220" height="147">
     <p>شواية</p>
   </div>
 </div>
@@ -117,7 +117,6 @@
       <p class="hero-sub" id="hero-tagline">نكهة الفحم الحقيقي، تحضر فوراً لتصلك طازجة ومقرمشة.</p>
       <div class="hero-actions">
         <button type="button" class="btn btn-primary" id="hero-order-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 17a2.5 2.5 0 0 0 2.5-2.5c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7.5 7.5 0 1 1-15 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
           اطلب الآن
         </button>
         <button type="button" class="btn btn-ghost" id="hero-browse-btn">تصفح المنيو</button>
@@ -191,12 +190,15 @@
 
 <!-- ================= ITEM MODAL ================= -->
 <div class="modal-overlay" id="modal-overlay"></div>
-<div class="item-modal" id="item-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+<div class="item-modal" id="item-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
   <button type="button" class="modal-close" aria-label="إغلاق">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
   </button>
   <div class="modal-media">
     <img src="" alt="" id="modal-image">
+    <div class="modal-scroll-cue" id="modal-scroll-cue" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
   </div>
   <div class="modal-scroll">
     <div id="modal-badges" class="badge-row" style="position:static"></div>
@@ -230,7 +232,7 @@
 
 <!-- ================= CART DRAWER ================= -->
 <div class="cart-overlay" id="cart-overlay"></div>
-<aside class="cart-drawer" id="cart-drawer" role="dialog" aria-modal="true" aria-label="سلة الطلبات">
+<aside class="cart-drawer" id="cart-drawer" role="dialog" aria-modal="true" aria-label="سلة الطلبات" aria-hidden="true">
   <div class="cart-header">
     <h2>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h2l2.6 12.6a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L21 8H6"/></svg>
@@ -261,6 +263,7 @@
 <!-- Scripts (deferred, load order matters for module deps) -->
 <script src="config.js" defer></script>
 <script src="js/icons.js" defer></script>
+<script src="js/restaurant-state.js" defer></script>
 <script src="js/supabase.js" defer></script>
 <script src="js/menu.js" defer></script>
 <script src="js/modal.js" defer></script>

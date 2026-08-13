@@ -78,33 +78,57 @@ const AdminUI = (() => {
     return window.confirm(message);
   }
 
-  /* ---- Mobile sidebar drawer: hamburger toggles it, backdrop/close/Escape
-     close it, and AdminRouter closes it automatically on every navigation. */
+  /* ---- Mobile sidebar drawer ------------------------------------------- */
+  let mobileNavLastFocused = null;
+  const isMobileViewport = () => window.matchMedia('(max-width: 900px)').matches;
   function isMobileNavOpen() {
     return document.getElementById('admin-sidebar').classList.contains('is-open');
   }
-  function openMobileNav() {
-    document.getElementById('admin-sidebar').classList.add('is-open');
-    document.getElementById('admin-sidebar-backdrop').classList.add('is-open');
-    document.getElementById('admin-hamburger-btn').setAttribute('aria-expanded', 'true');
-    document.body.classList.add('admin-nav-open');
-    document.querySelector('.admin-sidebar .admin-nav-link')?.focus();
+  function syncMobileNavAccessibility() {
+    const sidebar = document.getElementById('admin-sidebar');
+    const backdrop = document.getElementById('admin-sidebar-backdrop');
+    if (!isMobileViewport()) {
+      sidebar.removeAttribute('aria-hidden');
+      backdrop.setAttribute('aria-hidden', 'true');
+      return;
+    }
+    const open = isMobileNavOpen();
+    sidebar.setAttribute('aria-hidden', String(!open));
+    backdrop.setAttribute('aria-hidden', String(!open));
   }
-  function closeMobileNav() {
-    if (!isMobileNavOpen()) return;
+  function openMobileNav() {
+    if (!isMobileViewport()) return;
+    const sidebar = document.getElementById('admin-sidebar');
+    const backdrop = document.getElementById('admin-sidebar-backdrop');
+    mobileNavLastFocused = document.activeElement;
+    sidebar.classList.add('is-open');
+    backdrop.classList.add('is-open');
+    document.getElementById('admin-hamburger-btn').setAttribute('aria-expanded', 'true');
+    document.getElementById('admin-hamburger-btn').setAttribute('aria-label', 'إغلاق القائمة');
+    document.body.classList.add('admin-nav-open');
+    syncMobileNavAccessibility();
+    requestAnimationFrame(() => document.getElementById('admin-sidebar-close-btn')?.focus());
+  }
+  function closeMobileNav({ restoreFocus = false } = {}) {
+    const wasOpen = isMobileNavOpen();
     document.getElementById('admin-sidebar').classList.remove('is-open');
     document.getElementById('admin-sidebar-backdrop').classList.remove('is-open');
     document.getElementById('admin-hamburger-btn')?.setAttribute('aria-expanded', 'false');
+    document.getElementById('admin-hamburger-btn')?.setAttribute('aria-label', 'فتح القائمة');
     document.body.classList.remove('admin-nav-open');
+    syncMobileNavAccessibility();
+    if (restoreFocus && wasOpen) mobileNavLastFocused?.focus();
   }
   function toggleMobileNav() {
-    if (isMobileNavOpen()) closeMobileNav(); else openMobileNav();
+    if (isMobileNavOpen()) closeMobileNav({ restoreFocus: true }); else openMobileNav();
   }
   function bindMobileNav() {
     document.getElementById('admin-hamburger-btn').addEventListener('click', toggleMobileNav);
-    document.getElementById('admin-sidebar-close-btn').addEventListener('click', closeMobileNav);
-    document.getElementById('admin-sidebar-backdrop').addEventListener('click', closeMobileNav);
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMobileNav(); });
+    document.getElementById('admin-sidebar-close-btn').addEventListener('click', () => closeMobileNav({ restoreFocus: true }));
+    document.getElementById('admin-sidebar-backdrop').addEventListener('click', () => closeMobileNav({ restoreFocus: true }));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isMobileNavOpen()) closeMobileNav({ restoreFocus: true }); });
+    window.addEventListener('resize', () => { closeMobileNav(); syncMobileNavAccessibility(); });
+    syncMobileNavAccessibility();
   }
 
   return {

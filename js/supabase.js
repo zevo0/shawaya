@@ -42,7 +42,9 @@ const ShawayaData = (() => {
             .sort((a, b) => a.sort_order - b.sort_order)
             .map(g => ({
               id: g.id, title_ar: g.title_ar, type: g.type, required: g.required,
-              options: (g.product_options || []).sort((a, b) => a.sort_order - b.sort_order)
+              options: (g.product_options || [])
+                .filter((o) => o.is_active !== false)
+                .sort((a, b) => a.sort_order - b.sort_order)
                 .map(o => ({ id: o.id, label_ar: o.label_ar, price_delta: Number(o.price_delta) })),
             })),
         }));

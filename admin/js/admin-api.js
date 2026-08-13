@@ -61,6 +61,13 @@ const AdminAPI = (() => {
     const { error } = await table('categories').delete().eq('id', id);
     if (error) throw error;
   }
+  async function reorderCategories(rows) {
+    const results = await Promise.all(
+      rows.map(({ id, sort_order }) => table('categories').update({ sort_order }).eq('id', id))
+    );
+    const failed = results.find((result) => result.error);
+    if (failed) throw failed.error;
+  }
 
   /* ---- Products (+ nested option groups/options) ---------------------*/
   async function listProducts() {
@@ -74,6 +81,20 @@ const AdminAPI = (() => {
     const { data, error } = await table('products').upsert(row).select().single();
     if (error) throw error;
     return data;
+  }
+  async function reorderProducts(rows) {
+    // rows: [{ id, sort_order }, ...] from the drag-and-drop reordering in
+    // the products list. Deliberately plain UPDATE ... WHERE id = per row
+    // (never upsert): upsert() sends an INSERT-with-ON-CONFLICT statement,
+    // and with only {id, sort_order} in the payload that can violate
+    // not-null constraints on columns like name_ar if Postgres doesn't
+    // resolve the conflict as an update. UPDATE can only ever touch an
+    // existing row by id and never needs the product's other fields.
+    const results = await Promise.all(
+      rows.map(({ id, sort_order }) => table('products').update({ sort_order }).eq('id', id))
+    );
+    const failed = results.find((r) => r.error);
+    if (failed) throw failed.error;
   }
   async function deleteProduct(id) {
     const { error } = await table('products').delete().eq('id', id);
@@ -109,9 +130,18 @@ const AdminAPI = (() => {
     if (error) throw error;
     return data;
   }
-  async function updateOrderStatus(id, status) {
-    const { error } = await table('orders').update({ status }).eq('id', id);
+  async function markOrderDelivered(id) {
+    const { error } = await table('orders').update({ status: 'completed' }).eq('id', id);
     if (error) throw error;
+  }
+
+  function subscribeToOrders(onChange) {
+    if (!client) return () => {};
+    const channel = client.channel('admin-orders-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => onChange({ table: 'orders', payload }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items' }, (payload) => onChange({ table: 'order_items', payload }))
+      .subscribe();
+    return () => client.removeChannel(channel);
   }
 
   /* ---- Media library (Supabase Storage bucket: media) ------------------*/
@@ -161,20 +191,24 @@ const AdminAPI = (() => {
   }
 
   /* ---- Dashboard stats --------------------------------------------------*/
+  function omanTodayStartIso() {
+    // يوم المطعم يُحسب بتوقيت عُمان، لا بتوقيت جهاز الموظف أو خادم الاستضافة.
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Muscat', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date());
+    const value = (type) => parts.find((part) => part.type === type)?.value;
+    return new Date(`${value('year')}-${value('month')}-${value('day')}T00:00:00+04:00`).toISOString();
+  }
+
   async function dashboardStats() {
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
     const { data: todayOrders, error: e1 } = await table('orders')
       .select('*, order_items(*)')
-      .gte('created_at', todayStart.toISOString())
+      .gte('created_at', omanTodayStartIso())
       .order('created_at', { ascending: false });
     if (e1) throw e1;
 
-    const { data: recentOrders, error: e2 } = await table('orders')
-      .select('*, order_items(*)')
-      .order('created_at', { ascending: false })
-      .limit(8);
-    if (e2) throw e2;
+    // لا نعرض في الصفحة الرئيسية إلا طلبات اليوم، وبحد معقول حتى تبقى الشاشة مختصرة.
+    const recentOrders = (todayOrders || []).slice(0, 20);
 
     const productCounts = {};
     (todayOrders || []).forEach(o => {
@@ -186,7 +220,7 @@ const AdminAPI = (() => {
 
     return {
       todayOrderCount: (todayOrders || []).length,
-      todayRevenue: (todayOrders || []).reduce((sum, o) => sum + Number(o.total), 0),
+      todayRevenue: (todayOrders || []).filter((o) => o.status === 'completed').reduce((sum, o) => sum + Number(o.total), 0),
       topProduct: topProduct ? { name: topProduct[0], qty: topProduct[1] } : null,
       recentOrders: recentOrders || [],
     };
@@ -196,10 +230,10 @@ const AdminAPI = (() => {
     configured, client,
     signIn, signOut, getSession, onAuthChange,
     getSettings, updateSettings, toggleOpen,
-    listCategories, upsertCategory, deleteCategory,
-    listProducts, upsertProduct, deleteProduct,
+    listCategories, upsertCategory, deleteCategory, reorderCategories,
+    listProducts, upsertProduct, deleteProduct, reorderProducts,
     upsertOptionGroup, deleteOptionGroup, upsertOption, deleteOption,
-    listOrders, updateOrderStatus,
+    listOrders, markOrderDelivered, subscribeToOrders,
     listMedia, uploadMedia, deleteMedia,
     dashboardStats,
   };

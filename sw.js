@@ -1,25 +1,24 @@
 /**
- * sw.js — Minimal offline app-shell cache so the menu stays browsable
- * even on a weak connection.
+ * sw.js — Caches static assets (JS/CSS/images) for a snappier repeat visit
+ * and light offline resilience. Deliberately does NOT intercept navigation
+ * (the actual page/HTML request) — that's what previously risked the site
+ * hanging or failing to open for some visitors. Service workers that
+ * intercept navigation are a well-known source of "site won't load" bugs
+ * across browsers (Safari/WebKit in particular has had real, documented
+ * issues where a navigation-intercepting fetch handler — especially during
+ * an SW update via skipWaiting()/clients.claim() — can hang a tab
+ * indefinitely waiting on the SW's response). Letting the browser load the
+ * HTML page 100% natively removes the SW from that critical path entirely:
+ * worst case with this file, an asset falls back to a normal network
+ * request — the page itself can never be blocked by the SW.
  *
- * IMPORTANT: this only caches same-origin static shell files (HTML/CSS/JS/
- * logo/hero). It must NEVER cache cross-origin requests (Supabase REST API,
+ * IMPORTANT: never cache cross-origin requests (Supabase REST API,
  * Realtime, or Storage) — those always need a real network hit, otherwise
  * newly uploaded images and menu/price updates get served stale forever
  * to any visitor who already has the old response cached.
- *
- * Strategy:
- *  - navigation + shell assets: network-first, cache as a fallback for
- *    offline use (so a new deploy reaches visitors on their very next
- *    load instead of being stuck behind an old cached copy).
- *  - anything cross-origin (supabase.co, wa.me, etc.): always network,
- *    never touched by the cache.
  */
-const CACHE = 'shawaya-shell-v2';
+const CACHE = 'shawaya-assets-v3';
 const SHELL = [
-  './',
-  './index.html',
-  './config.js',
   './css/style.css',
   './css/components.css',
   './css/animations.css',
@@ -34,6 +33,19 @@ const SHELL = [
   './assets/images/logo.webp',
   './assets/images/hero.webp',
 ];
+
+// Network calls made by this SW are always time-boxed — an asset request
+// that never settles falls back to cache (or is simply left to fail)
+// rather than hanging anything.
+function fetchWithTimeout(request, ms = 4000) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('sw-fetch-timeout')), ms);
+    fetch(request).then(
+      (res) => { clearTimeout(timer); resolve(res); },
+      (err) => { clearTimeout(timer); reject(err); }
+    );
+  });
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)).catch(() => {}));
@@ -50,35 +62,18 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
+  if (request.mode === 'navigate') return; // never touch page navigation — let the browser handle it natively
 
   const url = new URL(request.url);
 
   // Cross-origin (Supabase REST/Realtime/Storage, WhatsApp, etc.): always
-  // go to the network, never read from or write to the cache. This is
-  // what keeps admin-panel uploads, price/menu edits, and open/closed
-  // status showing up immediately for every visitor.
-  if (url.origin !== self.location.origin) {
-    event.respondWith(fetch(request));
-    return;
-  }
+  // go straight to the network, untouched by the cache.
+  if (url.origin !== self.location.origin) return;
 
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((cache) => cache.put(request, copy)).catch(() => {});
-          return res;
-        })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match('./index.html')))
-    );
-    return;
-  }
-
-  // Same-origin static assets: network-first so code/asset updates reach
-  // visitors on their next load; cache is only a fallback when offline.
+  // Same-origin static assets: network-first (time-boxed) so updates reach
+  // visitors on their next load; cache is only a fallback.
   event.respondWith(
-    fetch(request)
+    fetchWithTimeout(request)
       .then((res) => {
         const copy = res.clone();
         caches.open(CACHE).then((cache) => cache.put(request, copy)).catch(() => {});

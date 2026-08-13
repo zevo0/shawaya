@@ -27,8 +27,6 @@ window.SHAWAYA_CONFIG = Object.freeze({
     open_hour: 12,
     close_hour: 24,
     is_open: true,
-    prep_time_min: 20,
-    prep_time_max: 30,
     instagram_url: "",
     seo_title: "شواية | Shawaya — أصل المشاوي العربية على الفحم",
     seo_description: "مشاوي عربية أصيلة تُشوى على الفحم الحقيقي وتصل طازجة ومقرمشة. اطلب الآن للاستلام من الفرع عبر واتساب.",

@@ -21,28 +21,39 @@ const AdminSettings = (() => {
     document.getElementById('settings-whatsapp').value = s.whatsapp_number || '';
     document.getElementById('settings-tagline').value = s.tagline || '';
     document.getElementById('settings-description').value = s.description || '';
+    document.getElementById('settings-seo-keywords').value = s.seo_keywords || '';
     document.getElementById('settings-map').value = s.map_url || '';
     document.getElementById('settings-open-hour').value = s.open_hour ?? 12;
     document.getElementById('settings-close-hour').value = s.close_hour ?? 24;
-    document.getElementById('settings-prep-min').value = s.prep_time_min ?? 20;
-    document.getElementById('settings-prep-max').value = s.prep_time_max ?? 30;
     document.getElementById('settings-instagram').value = s.instagram_url || '';
   }
 
   async function submit(e) {
     e.preventDefault();
+    const openHour = Number(document.getElementById('settings-open-hour').value);
+    const closeHour = Number(document.getElementById('settings-close-hour').value);
+    const whatsappNumber = document.getElementById('settings-whatsapp').value.trim();
+
+    if (!Number.isInteger(openHour) || openHour < 0 || openHour > 23 || !Number.isInteger(closeHour) || closeHour < 1 || closeHour > 24) {
+      AdminUI.toast('أدخل ساعات عمل صحيحة: الفتح من 0 إلى 23 والإغلاق من 1 إلى 24.', true);
+      return;
+    }
+    if (!/^\d{7,15}$/.test(whatsappNumber)) {
+      AdminUI.toast('رقم واتساب يجب أن يحتوي أرقاماً فقط، من 7 إلى 15 رقماً.', true);
+      return;
+    }
+
     const patch = {
       logo_url: document.getElementById('settings-logo-url').value || null,
       hero_url: document.getElementById('settings-hero-url').value || null,
       restaurant_name: document.getElementById('settings-name').value.trim(),
-      whatsapp_number: document.getElementById('settings-whatsapp').value.trim(),
+      whatsapp_number: whatsappNumber,
       tagline: document.getElementById('settings-tagline').value.trim(),
       description: document.getElementById('settings-description').value.trim(),
+      seo_keywords: document.getElementById('settings-seo-keywords').value.trim() || null,
       map_url: document.getElementById('settings-map').value.trim(),
-      open_hour: Number(document.getElementById('settings-open-hour').value),
-      close_hour: Number(document.getElementById('settings-close-hour').value),
-      prep_time_min: Number(document.getElementById('settings-prep-min').value),
-      prep_time_max: Number(document.getElementById('settings-prep-max').value),
+      open_hour: openHour,
+      close_hour: closeHour,
       instagram_url: document.getElementById('settings-instagram').value.trim() || null,
     };
     const msg = document.getElementById('settings-save-msg');
