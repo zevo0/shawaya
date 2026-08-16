@@ -85,3 +85,10 @@ Supabase الخاص بك يعمل مسبقاً ولديه هذا الجدول، 
 drop table if exists public.offers;
 ```
 
+## تحديث: حالة الإضافة (is_active على product_options)
+أضفنا عمود `is_active` لجدول `product_options` لدعم تفعيل/تعطيل أي إضافة من
+داخل نموذج تعديل المنتج مباشرة. `schema.sql` يضيفه تلقائياً حتى لمشروع
+Supabase شغّال مسبقاً (السطر يبدأ بـ `alter table ... add column if not
+exists`) — يكفي تشغّل ملف `schema.sql` كامل مرة واحدة من جديد بـ **SQL
+Editor**، وما راح يأثر على بياناتك الحالية.
+

@@ -355,6 +355,7 @@ mark {
   display: flex;
   flex-direction: column;
 }
+.item-card[hidden] { display: none; }
 .item-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lift); }
 
 .item-card-media {

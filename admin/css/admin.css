@@ -64,6 +64,13 @@ body.admin-body {
 .admin-sidebar .brand img { height: 34px; }
 .admin-sidebar .brand span { font-family: var(--font-display); font-weight: 800; color: #fff; font-size: var(--fs-md); }
 
+.admin-nav-icon {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  object-fit: contain;
+}
+
 .admin-nav-link {
   display: flex;
   align-items: center;
