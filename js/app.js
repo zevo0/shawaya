@@ -167,10 +167,6 @@
   }
 
   function initHeroButtons() {
-    document.getElementById('hero-order-btn')?.addEventListener('click', () => {
-      // الزر الرئيسي يبدأ مسار الطلب، بينما زر التصفح يبقى مخصصاً للاستكشاف.
-      CartDrawer.open();
-    });
     document.getElementById('hero-browse-btn')?.addEventListener('click', () => {
       document.getElementById('menu-sections').scrollIntoView({ behavior: 'smooth' });
     });
