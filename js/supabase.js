@@ -16,7 +16,14 @@
 const ShawayaData = (() => {
   const cfg = window.SHAWAYA_CONFIG?.supabase || {};
   const isLive = Boolean(cfg.url && cfg.anonKey && window.supabase);
-  const client = isLive ? window.supabase.createClient(cfg.url, cfg.anonKey) : null;
+  // persistSession/detectSessionInUrl: false — the public storefront never
+  // logs a user in, so there's no session to persist. This also sidesteps
+  // a real compatibility gap in some in-app browsers (Instagram/Facebook's
+  // included) that restrict or throw on localStorage access, which is
+  // what supabase-js's default auth storage adapter relies on.
+  const client = isLive
+    ? window.supabase.createClient(cfg.url, cfg.anonKey, { auth: { persistSession: false, detectSessionInUrl: false } })
+    : null;
 
   /* ---- Menu (categories + products + option groups/options) ------------ */
   async function fetchMenu() {
@@ -87,14 +94,19 @@ const ShawayaData = (() => {
   }
 
   /* ---- Orders (written at checkout so the admin dashboard sees them) --*/
+  function withTimeout(promise, ms = 6000) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('order-log-timeout')), ms)),
+    ]);
+  }
+
   async function createOrder({ lines, generalNotes, subtotal, total }) {
     if (!isLive) return { ok: false, reason: 'offline' };
     try {
-      const { data: order, error: orderErr } = await client
-        .from('orders')
-        .insert({ subtotal, total, general_notes: generalNotes || null })
-        .select()
-        .single();
+      const { data: order, error: orderErr } = await withTimeout(
+        client.from('orders').insert({ subtotal, total, general_notes: generalNotes || null }).select().single()
+      );
       if (orderErr) throw orderErr;
 
       const items = lines.map(l => ({
@@ -106,7 +118,7 @@ const ShawayaData = (() => {
         options_snapshot: l.optionLabels || [],
         notes: l.notes || null,
       }));
-      const { error: itemsErr } = await client.from('order_items').insert(items);
+      const { error: itemsErr } = await withTimeout(client.from('order_items').insert(items));
       if (itemsErr) throw itemsErr;
 
       return { ok: true, orderId: order.id };

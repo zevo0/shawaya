@@ -41,8 +41,6 @@ const WhatsAppCheckout = (() => {
     }
 
     // نفتح نافذة مؤقتة من نقرة المستخدم حتى لا يحجبها المتصفح بعد await.
-    // لا ننتقل إلى واتساب إلا بعد نجاح تسجيل الطلب؛ بهذه الطريقة لا تفقد
-    // لوحة التحكم طلباً أُرسل فعلياً إلى المطعم.
     const whatsappWindow = window.open('about:blank', '_blank');
     if (whatsappWindow) whatsappWindow.opener = null;
 
@@ -53,11 +51,15 @@ const WhatsAppCheckout = (() => {
       optionLabels: Cart.lineOptionLabels(l.product, l.selections),
       notes: l.notes,
     }));
+    // Logging the order to Supabase (so it shows up in لوحة التحكم) must
+    // NEVER be able to block the customer from reaching WhatsApp — it's a
+    // bookkeeping nice-to-have, not part of the actual order handoff. If
+    // it fails (network hiccup, a restrictive in-app browser, anything),
+    // checkout still proceeds; only the dashboard log is missing for that
+    // one order.
     const saved = await ShawayaData.createOrder({ lines: orderLines, generalNotes, subtotal: totals.subtotal, total: totals.total });
     if (!saved.ok) {
-      if (whatsappWindow) whatsappWindow.close();
-      Toast.show('تعذر تسجيل الطلب حالياً. تحقق من الاتصال ثم أعد المحاولة.');
-      return;
+      console.warn('Order log to Supabase failed — WhatsApp checkout proceeding anyway:', saved.reason);
     }
 
     const number = window.SHAWAYA_SETTINGS?.whatsapp_number || window.SHAWAYA_CONFIG.fallback.whatsapp_number;
