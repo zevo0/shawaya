@@ -1,85 +1,301 @@
 /**
- * whatsapp.js — Builds the formatted order message, logs the order to
- * Supabase (so it shows up in the admin dashboard), then opens wa.me.
- * No login, no phone/name collection — pickup-only flow.
- * Blocks checkout entirely while the restaurant is marked closed.
+ * whatsapp.js
+ * -----------------------------------------------------------------------
+ * WhatsApp is the PRIMARY customer handoff.
+ *
+ * IMPORTANT:
+ * - WhatsApp navigation must NOT depend on Supabase.
+ * - No window.open()
+ * - No about:blank
+ * - No await before WhatsApp navigation
+ * - No popup that needs to be redirected later
+ *
+ * Order logging is best-effort only and must never block the customer.
+ * -----------------------------------------------------------------------
  */
+
 const WhatsAppCheckout = (() => {
+
+  /**
+   * Get the restaurant WhatsApp number.
+   */
+  function getNumber() {
+    return (
+      window.SHAWAYA_SETTINGS?.whatsapp_number ||
+      window.SHAWAYA_CONFIG?.fallback?.whatsapp_number ||
+      ''
+    );
+  }
+
+  /**
+   * Build the WhatsApp URL.
+   *
+   * This function is completely synchronous.
+   * No Supabase. No fetch. No await.
+   */
+  function buildWhatsAppUrl() {
+    const number = getNumber();
+
+    if (!number) {
+      console.error('WhatsApp number is missing.');
+      return null;
+    }
+
+    const { lines } = Cart.getState();
+
+    // Normal WhatsApp contact from the floating button.
+    if (!lines.length) {
+      return `https://wa.me/${number}`;
+    }
+
+    const text = encodeURIComponent(buildMessage());
+
+    return `https://wa.me/${number}?text=${text}`;
+  }
+
+  /**
+   * Build the formatted order message.
+   */
   function buildMessage() {
     const { lines, generalNotes, totals } = Cart.getState();
-    let msg = `🏃 طلب استلام من الفرع - ${window.SHAWAYA_SETTINGS?.restaurant_name || 'شواية'}\n\n`;
+
+    let msg =
+      `🏃 طلب استلام من الفرع - ${
+        window.SHAWAYA_SETTINGS?.restaurant_name || 'شواية'
+      }\n\n`;
+
     msg += `🍽️ تفاصيل الطلب\n`;
+
     lines.forEach((line, i) => {
-      const unit = Cart.lineUnitPrice(line.product, line.selections);
-      const opts = Cart.lineOptionLabels(line.product, line.selections);
+      const unit = Cart.lineUnitPrice(
+        line.product,
+        line.selections
+      );
+
+      const opts = Cart.lineOptionLabels(
+        line.product,
+        line.selections
+      );
+
       msg += `\n${i + 1}️⃣ ${line.product.name_ar}\n`;
       msg += `   الكمية: ${line.qty}\n`;
-      if (opts.length) msg += `   الخيارات: ${opts.join('، ')}\n`;
-      if (line.notes) msg += `   الملاحظات: ${line.notes}\n`;
+
+      if (opts.length) {
+        msg += `   الخيارات: ${opts.join('، ')}\n`;
+      }
+
+      if (line.notes) {
+        msg += `   الملاحظات: ${line.notes}\n`;
+      }
+
       msg += `   السعر: ${Menu.currency(unit * line.qty)}\n`;
     });
-    msg += `\n📝 ملاحظات عامة:\n${generalNotes?.trim() || 'لا يوجد'}\n`;
+
+    msg += `\n📝 ملاحظات عامة:\n${
+      generalNotes?.trim() || 'لا يوجد'
+    }\n`;
+
     msg += `\n💰 إجمالي المبلغ:\n${Menu.currency(totals.total)}\n`;
+
     msg += `\n⏱️ يرجى إفادتي بالوقت المتوقع لجاهزية الطلب.`;
+
     return msg;
   }
 
+  /**
+   * Check whether restaurant is currently open.
+   */
   function isRestaurantOpen() {
     const settings = window.SHAWAYA_SETTINGS;
-    // لا نكمل الطلب قبل وصول الإعدادات الحية؛ هذا يمنع حالة فتح افتراضية
-    // تتعارض مع قرار لوحة التحكم عند حدوث تأخر في التحميل.
-    return Boolean(settings) && RestaurantState.isOpen(settings);
+
+    return Boolean(settings) &&
+      RestaurantState.isOpen(settings);
   }
 
-  async function send() {
-    const { lines, generalNotes, totals } = Cart.getState();
-    if (!lines.length) { Toast.show('السلة فارغة'); return; }
+  /**
+   * Best-effort dashboard logging.
+   *
+   * IMPORTANT:
+   * This function is NEVER awaited by the WhatsApp navigation path.
+   */
+  function logOrderInBackground() {
+    try {
+      const { lines, generalNotes, totals } = Cart.getState();
 
-    if (!isRestaurantOpen()) {
-      Toast.show('عذراً، المطعم مغلق حالياً. لا يمكن إتمام الطلب.');
+      if (!lines.length) return;
+
+      const orderLines = lines.map((l) => ({
+        product: l.product,
+        qty: l.qty,
+        unitPrice: Cart.lineUnitPrice(
+          l.product,
+          l.selections
+        ),
+        optionLabels: Cart.lineOptionLabels(
+          l.product,
+          l.selections
+        ),
+        notes: l.notes,
+      }));
+
+      // Intentionally NOT awaited.
+      // WhatsApp must remain independent.
+      ShawayaData.createOrder({
+        lines: orderLines,
+        generalNotes,
+        subtotal: totals.subtotal,
+        total: totals.total,
+      }).catch((err) => {
+        console.warn(
+          'Background order logging failed:',
+          err
+        );
+      });
+
+    } catch (err) {
+      console.warn(
+        'Could not start background order logging:',
+        err
+      );
+    }
+  }
+
+  /**
+   * Navigate directly to WhatsApp.
+   *
+   * NO window.open()
+   * NO popup
+   * NO await
+   * NO Supabase before navigation
+   */
+  function navigateToWhatsApp(url) {
+    if (!url) {
+      Toast.show('رقم الواتساب غير متوفر حالياً.');
       return;
     }
 
-    // نفتح نافذة مؤقتة من نقرة المستخدم حتى لا يحجبها المتصفح بعد await.
-    const whatsappWindow = window.open('about:blank', '_blank');
-    if (whatsappWindow) whatsappWindow.opener = null;
+    /*
+     * Direct navigation is intentional.
+     *
+     * We do NOT use:
+     * window.open()
+     * about:blank
+     * location.replace() on another window
+     *
+     * The navigation happens directly inside the user's click event.
+     */
+    window.location.href = url;
+  }
 
-    const orderLines = lines.map(l => ({
-      product: l.product,
-      qty: l.qty,
-      unitPrice: Cart.lineUnitPrice(l.product, l.selections),
-      optionLabels: Cart.lineOptionLabels(l.product, l.selections),
-      notes: l.notes,
-    }));
-    // Logging the order to Supabase (so it shows up in لوحة التحكم) must
-    // NEVER be able to block the customer from reaching WhatsApp — it's a
-    // bookkeeping nice-to-have, not part of the actual order handoff. If
-    // it fails (network hiccup, a restrictive in-app browser, anything),
-    // checkout still proceeds; only the dashboard log is missing for that
-    // one order.
-    const saved = await ShawayaData.createOrder({ lines: orderLines, generalNotes, subtotal: totals.subtotal, total: totals.total });
-    if (!saved.ok) {
-      console.warn('Order log to Supabase failed — WhatsApp checkout proceeding anyway:', saved.reason);
+  /**
+   * Send the current cart order to WhatsApp.
+   */
+  function send(e) {
+    if (e) {
+      e.preventDefault();
     }
 
-    const number = window.SHAWAYA_SETTINGS?.whatsapp_number || window.SHAWAYA_CONFIG.fallback.whatsapp_number;
-    const text = encodeURIComponent(buildMessage());
-    const url = `https://wa.me/${number}?text=${text}`;
-    if (whatsappWindow) whatsappWindow.location.replace(url);
-    else window.open(url, '_blank', 'noopener');
+    const { lines } = Cart.getState();
+
+    if (!lines.length) {
+      Toast.show('السلة فارغة');
+      return;
+    }
+
+    /*
+     * Keep the restaurant-open check.
+     *
+     * This is unrelated to WhatsApp itself, but orders should not
+     * be submitted while the restaurant is closed.
+     */
+    if (!isRestaurantOpen()) {
+      Toast.show(
+        'عذراً، المطعم مغلق حالياً. لا يمكن إتمام الطلب.'
+      );
+      return;
+    }
+
+    /*
+     * Build URL synchronously.
+     */
+    const url = buildWhatsAppUrl();
+
+    if (!url) {
+      Toast.show('تعذر فتح واتساب حالياً.');
+      return;
+    }
+
+    /*
+     * Start dashboard logging without waiting for it.
+     *
+     * This is deliberately AFTER the URL has been built and immediately
+     * before navigation. It must never control the customer's checkout.
+     */
+    logOrderInBackground();
+
+    /*
+     * Direct navigation.
+     */
+    navigateToWhatsApp(url);
+  }
+
+  /**
+   * Open normal WhatsApp contact from FAB.
+   */
+  function openContact(e) {
+    if (e) {
+      e.preventDefault();
+    }
+
+    const url = buildWhatsAppUrl();
+
+    /*
+     * If cart has items, buildWhatsAppUrl() produces the order message.
+     * If cart is empty, it produces a normal wa.me URL.
+     */
+    navigateToWhatsApp(url);
   }
 
   function init() {
-    document.getElementById('checkout-whatsapp').addEventListener('click', send);
-    document.getElementById('whatsapp-fab').addEventListener('click', (e) => {
-      e.preventDefault();
-      const number = window.SHAWAYA_SETTINGS?.whatsapp_number || window.SHAWAYA_CONFIG.fallback.whatsapp_number;
-      const { lines } = Cart.getState();
-      if (lines.length) { send(); return; }
-      window.open(`https://wa.me/${number}`, '_blank', 'noopener');
-    });
+    const checkoutButton =
+      document.getElementById('checkout-whatsapp');
+
+    const whatsappFab =
+      document.getElementById('whatsapp-fab');
+
+    if (checkoutButton) {
+      checkoutButton.addEventListener(
+        'click',
+        send
+      );
+    } else {
+      console.warn(
+        'WhatsApp checkout button #checkout-whatsapp not found.'
+      );
+    }
+
+    if (whatsappFab) {
+      whatsappFab.addEventListener(
+        'click',
+        openContact
+      );
+    } else {
+      console.warn(
+        'WhatsApp FAB #whatsapp-fab not found.'
+      );
+    }
   }
 
-  document.addEventListener('DOMContentLoaded', init);
-  return { buildMessage, send, isRestaurantOpen };
+  document.addEventListener(
+    'DOMContentLoaded',
+    init
+  );
+
+  return {
+    buildMessage,
+    buildWhatsAppUrl,
+    send,
+    isRestaurantOpen,
+  };
+
 })();
