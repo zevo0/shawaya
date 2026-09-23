@@ -82,37 +82,30 @@
   .site-header, .cart-drawer, .whatsapp-fab, .sticky-cart-bar, .modal-overlay, .item-modal, .scroll-indicator { display: none !important; }
 }
 
-/* =========================================================
-   MOBILE HERO — 16:10 COMPOSITION
-   Keeps the existing Shawaya UI/visual identity while giving
-   the image and CTA a wider, more balanced mobile composition.
-   ========================================================= */
+/* ---- Mobile hero: compact 16:10 composition ---------------------------- */
+/*
+ * Only the hero is changed here.
+ * Menu/card/grid sizing remains exactly as in the original responsive rules.
+ */
 @media (max-width: 720px) {
   .hero {
-    aspect-ratio: 16 / 10;
+    min-height: 0;
     height: auto;
-    min-height: clamp(420px, 62.5vw, 560px);
-    max-height: 620px;
-    overflow: hidden;
-  }
-
-  .hero-media,
-  .hero-media img {
-    width: 100%;
-    height: 100%;
-  }
-
-  .hero-media img {
-    object-fit: cover;
-    object-position: center center;
+    aspect-ratio: 16 / 10;
+    padding-bottom: 0;
   }
 
   .hero-content {
-    min-height: 100%;
-    padding-block: clamp(44px, 9vw, 72px) clamp(28px, 6vw, 48px);
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+    padding-block: clamp(42px, 10vw, 64px) clamp(28px, 7vw, 42px);
+  }
+
+  .hero::after {
+    height: 24px;
+    border-radius: 22px 22px 0 0;
+  }
+
+  .scroll-indicator {
+    display: none;
   }
 }
 
