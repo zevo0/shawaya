@@ -84,10 +84,12 @@
     if (s.favicon_url) { $('favicon-link').href = s.favicon_url; $('apple-touch-icon-link').href = s.favicon_url; }
 
     // Contact / social
-    const waLink = `https://wa.me/${s.whatsapp_number}`;
+    const whatsappNumber = String(s.whatsapp_number || '').replace(/[^0-9]/g, '');
+    const waLink = whatsappNumber ? `https://wa.me/${whatsappNumber}` : '#';
     $('footer-whatsapp').href = waLink;
     $('footer-map').href = s.map_url;
     $('whatsapp-fab-header').href = waLink;
+    $('whatsapp-fab').href = waLink;
     $('map-pin-btn').href = s.map_url;
 
     ['instagram'].forEach((key) => {
