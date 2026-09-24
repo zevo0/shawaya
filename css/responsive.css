@@ -82,7 +82,7 @@
   .site-header, .cart-drawer, .whatsapp-fab, .sticky-cart-bar, .modal-overlay, .item-modal, .scroll-indicator { display: none !important; }
 }
 
-/* ---- Mobile hero: compact 16:10 composition ---------------------------- */
+/* ---- Mobile hero: compact 3:2 composition ------------------------------ */
 /*
  * Only the hero is changed here.
  * Menu/card/grid sizing remains exactly as in the original responsive rules.
@@ -90,13 +90,78 @@
 @media (max-width: 720px) {
   .hero {
     min-height: 0;
-    height: auto;
-    aspect-ratio: 4 / 3;
+    width: 100%;
+    height: min(40svh, calc(100vw * 2 / 3));
+    aspect-ratio: 3 / 2;
     padding-bottom: 0;
   }
 
   .hero-content {
-    padding-block: clamp(42px, 10vw, 64px) clamp(28px, 7vw, 42px);
+    width: calc(100% - 32px);
+    padding-block: 2px 28px;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hero-heading {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding-inline: 6px;
+    direction: rtl;
+    transform: translateY(-6px);
+  }
+
+  .hero-heading h1 {
+    direction: rtl;
+    font-size: clamp(1.85rem, 7.5vw, 2.25rem);
+    margin: 0;
+  }
+
+  .hero-content .hero-sub {
+    max-width: 34ch;
+    align-self: stretch;
+    font-size: .94rem;
+    line-height: 1.35;
+    text-align: right;
+  }
+
+  .hero-status {
+    width: max-content;
+    max-width: 100%;
+    padding: 5px 11px;
+    gap: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .hero-status .dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .hero-heading:has(> :only-child),
+  .hero-heading:has(> h1:empty),
+  .hero-heading:has(> h1[hidden]) {
+    justify-content: center;
+  }
+
+  .hero-actions {
+    width: 100%;
+    align-self: center;
+    justify-content: center;
+    margin-top: 4px;
+    padding-bottom: 6px;
+  }
+
+  .hero-actions .btn {
+    width: 60vw;
+    max-width: 60vw;
+    min-width: 0;
+    margin-inline: auto;
+    padding-block: 11px;
   }
 
   .hero::after {
@@ -108,4 +173,3 @@
     display: none;
   }
 }
-
