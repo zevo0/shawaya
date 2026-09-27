@@ -24,6 +24,7 @@ window.SHAWAYA_CONFIG = Object.freeze({
     hero_url: "assets/images/hero.webp",
     whatsapp_number: "96890992253",
     map_url: "https://maps.google.com",
+    site_url: "",
     open_hour: 12,
     close_hour: 24,
     is_open: true,

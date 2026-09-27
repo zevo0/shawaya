@@ -99,9 +99,12 @@ const WhatsAppCheckout = (() => {
       const chromeBtn = document.createElement('button');
       chromeBtn.type = 'button';
       chromeBtn.className = 'btn btn-outline btn-sm';
-      chromeBtn.textContent = 'فتح في Chrome';
+      chromeBtn.textContent = 'فتح الموقع في Chrome';
       chromeBtn.addEventListener('click', () => {
-        window.location.href = androidChromeIntentUrl(url);
+        // Opens the storefront itself (not the wa.me link) in the real
+        // browser — dynamic per restaurant via Site Settings → "رابط
+        // الموقع", falling back to this deployment's own domain.
+        window.location.href = androidChromeIntentUrl(getSiteUrl());
       });
       actions.appendChild(chromeBtn);
     }
@@ -161,6 +164,14 @@ const WhatsAppCheckout = (() => {
   function watchAnchor(el) {
     if (!el) return;
     el.addEventListener('click', () => watchOnce(el.href, 'نسخ الرقم', getNumber()));
+  }
+
+  function getSiteUrl() {
+    return (
+      window.SHAWAYA_SETTINGS?.site_url ||
+      window.SHAWAYA_CONFIG?.fallback?.site_url ||
+      window.location.origin
+    );
   }
 
   function getNumber() {

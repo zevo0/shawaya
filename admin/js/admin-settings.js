@@ -23,6 +23,7 @@ const AdminSettings = (() => {
     document.getElementById('settings-description').value = s.description || '';
     document.getElementById('settings-seo-keywords').value = s.seo_keywords || '';
     document.getElementById('settings-map').value = s.map_url || '';
+    document.getElementById('settings-site-url').value = s.site_url || '';
     document.getElementById('settings-open-hour').value = s.open_hour ?? 12;
     document.getElementById('settings-close-hour').value = s.close_hour ?? 24;
     document.getElementById('settings-instagram').value = s.instagram_url || '';
@@ -52,6 +53,7 @@ const AdminSettings = (() => {
       description: document.getElementById('settings-description').value.trim(),
       seo_keywords: document.getElementById('settings-seo-keywords').value.trim() || null,
       map_url: document.getElementById('settings-map').value.trim(),
+      site_url: document.getElementById('settings-site-url').value.trim() || null,
       open_hour: openHour,
       close_hour: closeHour,
       instagram_url: document.getElementById('settings-instagram').value.trim() || null,

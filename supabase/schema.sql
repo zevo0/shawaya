@@ -19,6 +19,7 @@ create table if not exists public.settings (
   hero_url text,
   whatsapp_number text not null default '96890000000',
   map_url text default 'https://maps.google.com',
+  site_url text,
   open_hour int not null default 12 check (open_hour between 0 and 23),
   close_hour int not null default 24 check (close_hour between 1 and 24),
   is_open boolean not null default true,
