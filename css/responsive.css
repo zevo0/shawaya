@@ -27,6 +27,7 @@
   .brand-name { display: none; }
   .nav-categories { display: none; } /* replaced by sticky category-nav lower on page */
 
+
   .hero { min-height: 86svh; padding-bottom: 30px; }
   .hero-content { padding-block: 88px 92px; align-items: stretch; }
   .hero-actions { flex-direction: column; }
@@ -47,6 +48,8 @@
   .cart-drawer { width: 100vw; }
 
   .footer-grid { grid-template-columns: 1fr; gap: 30px; }
+  .powered-by img { width: 154px; }
+  .powered-by-footer { margin-top: 20px; padding: 10px 12px; min-height: 52px; }
   .footer-bottom { flex-direction: column; text-align: center; }
 
   .menu-grid { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 16px; }

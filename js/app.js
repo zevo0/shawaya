@@ -88,7 +88,6 @@
     const waLink = whatsappNumber ? `https://wa.me/${whatsappNumber}` : '#';
     $('footer-whatsapp').href = waLink;
     $('footer-map').href = s.map_url;
-    $('whatsapp-fab-header').href = waLink;
     $('whatsapp-fab').href = waLink;
     $('map-pin-btn').href = s.map_url;
 
@@ -174,11 +173,6 @@
     });
   }
 
-  function initFooterCategories(categories) {
-    const ul = document.getElementById('footer-categories');
-    if (!ul) return;
-    ul.innerHTML = categories.map(c => `<li><a href="#cat-${c.id}">${c.name_ar}</a></li>`).join('');
-  }
 
   async function loadSettings() {
     const settings = await ShawayaData.fetchSettings();
@@ -188,7 +182,6 @@
   async function loadMenu() {
     const data = await ShawayaData.fetchMenu();
     Menu.render(data);
-    initFooterCategories(data.categories);
   }
 
   let unsubscribe = null;

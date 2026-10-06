@@ -161,11 +161,6 @@ const WhatsAppCheckout = (() => {
     }, 700);
   }
 
-  function watchAnchor(el) {
-    if (!el) return;
-    el.addEventListener('click', () => watchOnce(el.href, 'نسخ الرقم', getNumber()));
-  }
-
   function getSiteUrl() {
     return (
       window.SHAWAYA_SETTINGS?.site_url ||
@@ -280,7 +275,65 @@ const WhatsAppCheckout = (() => {
     navigateToWhatsApp(url, { copyLabel: 'نسخ تفاصيل الطلب', copyValue: message });
   }
 
+  // Proactive prompt (Android + Instagram/Facebook in-app browser only):
+  // shown once, right on page load, BEFORE the customer builds a cart. This
+  // replaces relying on the after-checkout fallback dialog alone for this
+  // case — that one only appears once the order is already built, and
+  // sending the customer to Chrome at that point starts a fresh browser
+  // session with an empty cart, so the whole order has to be redone. Asking
+  // up front avoids that entirely. Reuses the exact same dialog look as the
+  // existing help dialog (same CSS classes), just with different content.
+  function maybeShowChromePrompt() {
+    if (!isAndroid() || !isInAppBrowser()) return;
+    if (sessionStorage.getItem('shawaya_iab_prompt_seen')) return;
+    sessionStorage.setItem('shawaya_iab_prompt_seen', '1');
+
+    const overlay = document.createElement('div');
+    overlay.className = 'cart-confirm-overlay';
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.innerHTML = `
+      <section class="cart-confirm-dialog iab-help-dialog" role="dialog" aria-modal="true" aria-labelledby="iab-pre-title" aria-describedby="iab-pre-desc">
+        <button type="button" class="iab-help-close" data-iab-pre-close aria-label="إغلاق">${icon('x')}</button>
+        <div class="iab-help-icon">${icon('instagram')}</div>
+        <h2 id="iab-pre-title">تجربة طلب أفضل</h2>
+        <p id="iab-pre-desc">أنت تتصفح من داخل إنستقرام، وهو يمنع أحياناً إتمام الطلب عبر واتساب بعد اختيار الأصناف. لتفادي فقد طلبك، ننصحك تفتح الموقع من Chrome من البداية.</p>
+        <div class="cart-confirm-actions iab-help-actions" data-iab-pre-actions></div>
+      </section>`;
+    document.body.appendChild(overlay);
+
+    const actions = overlay.querySelector('[data-iab-pre-actions]');
+
+    const chromeBtn = document.createElement('button');
+    chromeBtn.type = 'button';
+    chromeBtn.className = 'btn btn-primary btn-sm';
+    chromeBtn.textContent = 'فتح في Chrome';
+    chromeBtn.addEventListener('click', () => {
+      window.location.href = androidChromeIntentUrl(window.location.href);
+    });
+
+    const stayBtn = document.createElement('button');
+    stayBtn.type = 'button';
+    stayBtn.className = 'btn btn-outline btn-sm';
+    stayBtn.textContent = 'متابعة هنا';
+    stayBtn.addEventListener('click', closePrompt);
+
+    actions.appendChild(chromeBtn);
+    actions.appendChild(stayBtn);
+
+    function closePrompt() {
+      overlay.classList.remove('is-open');
+      overlay.setAttribute('aria-hidden', 'true');
+      setTimeout(() => overlay.remove(), 300);
+    }
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closePrompt(); });
+    overlay.querySelector('[data-iab-pre-close]').addEventListener('click', closePrompt);
+
+    requestAnimationFrame(() => overlay.classList.add('is-open'));
+  }
+
   function init() {
+    maybeShowChromePrompt();
+
     const checkoutButton = document.getElementById('checkout-whatsapp');
     if (checkoutButton) checkoutButton.addEventListener('click', send);
 
@@ -302,8 +355,6 @@ const WhatsAppCheckout = (() => {
         }
       });
     }
-
-    watchAnchor(document.getElementById('whatsapp-fab-header'));
   }
 
   document.addEventListener('DOMContentLoaded', init);

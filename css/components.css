@@ -70,6 +70,40 @@
 }
 .nav-categories a:hover, .nav-categories a:focus-visible { background: rgba(var(--color-primary-rgb), .08); color: var(--color-primary); }
 
+.powered-by {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.powered-by img {
+  width: clamp(132px, 34vw, 176px);
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+.powered-by-footer {
+  width: fit-content;
+  min-height: 48px;
+  margin: 22px auto 0;
+  padding: 8px 12px;
+  border: 0;
+  background: transparent;
+  border-radius: 12px;
+  transition: transform .2s var(--ease-spring), opacity .2s ease;
+}
+.powered-by-footer:hover {
+  transform: translateY(-2px);
+  opacity: .9;
+}
+.powered-by-footer:focus-visible {
+  outline: 2px solid rgba(255,255,255,.65);
+  outline-offset: 4px;
+}
+.powered-by-label { display: none; }
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -361,6 +395,12 @@ mark {
   transition: transform .4s var(--ease-out), box-shadow .4s var(--ease-out);
   display: flex;
   flex-direction: column;
+  /* iOS Safari computes a grid item's default min-width from its content's
+     intrinsic size (here, the <img width="400"> attribute) instead of the
+     grid track's actual computed width — this is what makes cards balloon
+     to the image's native size on iPhone while Chrome/Android stays correct.
+     Forcing min-width: 0 makes Safari respect the track width like Chrome does. */
+  min-width: 0;
 }
 .item-card[hidden] { display: none; }
 .item-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lift); }
@@ -812,7 +852,7 @@ mark {
 }
 .footer-grid {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
+  grid-template-columns: 1.35fr 1fr;
   gap: 40px;
   padding-bottom: 36px;
   border-bottom: 1px solid rgba(255,255,255,.1);
