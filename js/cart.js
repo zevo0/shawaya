@@ -5,6 +5,7 @@ const Cart = (() => {
   const MAX_ITEM_QTY = 20;
   let lines = []; // { lineId, product, qty, selections, notes }
   let generalNotes = '';
+  let carNumber = '';
 
   function lineOptionLabels(product, selections) {
     const labels = [];
@@ -98,6 +99,7 @@ const Cart = (() => {
 
   function clear() {
     lines = [];
+    carNumber = '';
     render();
   }
 
@@ -160,6 +162,11 @@ const Cart = (() => {
       <div class="cart-lines">
         ${lines.map(lineTemplate).join('')}
       </div>
+      <div class="cart-car-number">
+        <label for="cart-car-number"> رقم السيارة <span>— اختياري</span></label>
+        <input id="cart-car-number" type="text" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="مثال: 12345" value="${Menu.escapeHtml(carNumber)}">
+        <p>يساعدنا على معرفة سيارتك عند تجهيز الطلب.</p>
+      </div>
       <div class="cart-notes">
         <label for="cart-general-notes">ملاحظات عامة على الطلب</label>
         <textarea id="cart-general-notes" placeholder="مثال: الرجاء تقليل الملح، أو أي طلب خاص...">${generalNotes}</textarea>
@@ -167,6 +174,7 @@ const Cart = (() => {
       <div class="upsell-block" id="upsell-block"></div>
     `;
 
+    body.querySelector('#cart-car-number').addEventListener('input', (e) => { carNumber = e.target.value.trim(); });
     body.querySelector('#cart-general-notes').addEventListener('input', (e) => { generalNotes = e.target.value; });
     bindLineEvents();
     renderUpsell();
@@ -234,7 +242,7 @@ const Cart = (() => {
     document.getElementById('cart-total').innerHTML = Menu.priceHtml(total);
   }
 
-  function getState() { return { lines, generalNotes, totals: totals() }; }
+  function getState() { return { lines, generalNotes, carNumber, totals: totals() }; }
 
   return { addItem, removeLine, updateQty, clear, render, count, getState, lineUnitPrice, lineOptionLabels };
 })();

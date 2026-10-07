@@ -52,7 +52,7 @@
   .powered-by-footer { margin-top: 20px; padding: 10px 12px; min-height: 52px; }
   .footer-bottom { flex-direction: column; text-align: center; }
 
-  .menu-grid { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 16px; }
+  .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .item-card-body { padding: 14px 16px 16px; gap: 8px; }
   .item-card-body h3 { font-size: var(--fs-sm); }
   .quick-add-btn span { display: none; }
@@ -68,7 +68,7 @@
 @media (max-width: 380px) {
   .container, .header-inner { width: calc(100% - 24px); }
   .hero-content h1 { font-size: 2.1rem; }
-  .menu-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 }
 
 /* ---- Ultra-wide ------------------------------------------------------ */

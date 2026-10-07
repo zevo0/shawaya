@@ -183,7 +183,7 @@ const WhatsAppCheckout = (() => {
   }
 
   function buildMessage() {
-    const { lines, generalNotes, totals } = Cart.getState();
+    const { lines, generalNotes, carNumber, totals } = Cart.getState();
     let msg = `🏃 طلب استلام من الفرع - ${window.SHAWAYA_SETTINGS?.restaurant_name || 'شواية'}\n\n`;
     msg += `🍽️ تفاصيل الطلب\n`;
     lines.forEach((line, i) => {
@@ -195,6 +195,7 @@ const WhatsAppCheckout = (() => {
       if (line.notes) msg += `   الملاحظات: ${line.notes}\n`;
       msg += `   السعر: ${Menu.currency(unit * line.qty)}\n`;
     });
+    if (carNumber?.trim()) msg += `\n🚗 رقم السيارة: ${carNumber.trim()}\n`;
     msg += `\n📝 ملاحظات عامة:\n${generalNotes?.trim() || 'لا يوجد'}\n`;
     msg += `\n💰 إجمالي المبلغ:\n${Menu.currency(totals.total)}\n`;
     msg += `\n⏱️ يرجى إفادتي بالوقت المتوقع لجاهزية الطلب.`;
